@@ -1,0 +1,185 @@
+{% extends "site/base.html" %}
+{% from "site/base.html" import logomark %}
+{% block title %}SHELF — your semester, filed{% endblock %}
+{% block body %}
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">Build · Organise · Scale</p>
+      <h1>Forward it once.<br>Ask for it <em>whenever</em>.</h1>
+      <p class="lead">One WhatsApp contact that files everything you send it — slides,
+        scans, pasted notes, deadlines — and gives it back weeks later when you
+        ask in plain words. No app to install. No new habit.</p>
+
+      <form class="start" method="post" action="/verify">
+        <label for="phone">Your WhatsApp number</label>
+        <div class="field">
+          <span class="cc">+91</span>
+          <input id="phone" name="phone" inputmode="numeric" autocomplete="tel-national"
+                 placeholder="98765 43210" maxlength="13" value="{{ phone or '' }}" required>
+        </div>
+        <button class="btn btn-primary btn-full" type="submit" style="margin-top:14px">
+          Verify this number
+        </button>
+        <p class="hint">We verify it before taking any money — this is the number the
+          assistant will talk to, so it has to be the phone WhatsApp is on.</p>
+      </form>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <div class="glow"></div>
+      {{ logomark(210) }}
+      <div class="horizon"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Getting started</p>
+      <h2>Three steps, and the first two happen once.</h2>
+    </div>
+    <ol class="steps">
+      <li>
+        <span class="num">01</span>
+        <h3>Verify your number</h3>
+        <p>You send the assistant a six-character code from your own WhatsApp.
+          That is the whole check — the message arriving proves the phone is yours,
+          so there is no OTP to wait for and nothing to intercept.</p>
+      </li>
+      <li>
+        <span class="num">02</span>
+        <h3>Pay ₹89 for the month</h3>
+        <p>Razorpay handles the card or UPI mandate. Access starts the moment the
+          payment clears, and it is tied to the number you just verified.</p>
+      </li>
+      <li>
+        <span class="num">03</span>
+        <h3>Start forwarding</h3>
+        <p>Send a file with a caption and it is filed. Ask for it back in whatever
+          words you would use with a friend.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">What it does</p>
+      <h2>It reads captions, not filenames.</h2>
+      <p class="lead" style="margin-top:14px">A scan arrives called
+        <span class="mono-inline">CamScanner 03-01-2026 10.14.pdf</span>. You captioned it
+        "DBMS unit 2". Five weeks later you ask for your DBMS unit 2 notes and get that
+        file — because it was filed under what you said, not what your scanner named it.</p>
+    </div>
+
+    <div class="grid g3">
+      <article class="panel feature">
+        <p class="ftag">Storage</p>
+        <h3>Send it, it's filed</h3>
+        <p>Files, links and pasted text all become one row under the right subject.
+          Anything it cannot place, it asks about once — and never nags again.</p>
+      </article>
+      <article class="panel feature">
+        <p class="ftag">Retrieval</p>
+        <h3>Ask the way you talk</h3>
+        <p>"send my os previous year papers". No folder names, no search syntax,
+          no remembering what you called it at the time.</p>
+      </article>
+      <article class="panel feature">
+        <p class="ftag">Deadlines</p>
+        <h3>Nudges that actually fire</h3>
+        <p>Tell it something is due Friday and it remembers, then messages you
+          before it is. Weekly labs get one reminder a week, not thirty rows.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="price">
+  <div class="wrap price-row">
+    <div class="section-head" style="margin-bottom:0">
+      <p class="eyebrow">Price</p>
+      <h2>One number, no tiers.</h2>
+      <p class="lead" style="margin-top:14px">Everything above, for every subject you
+        are taking, for as long as you are subscribed.</p>
+    </div>
+
+    <div class="panel pricecard">
+      <div class="amount">
+        <span class="rupee">₹</span><span class="figure">{{ rupees }}</span>
+        <span class="per">/ month</span>
+      </div>
+      <hr class="rule" style="margin-block:22px">
+      <ul class="ticks">
+        <li>Unlimited files, notes and deadlines</li>
+        <li>A browsable drive of everything you've sent</li>
+        <li>Cancel any time — you keep the month you paid for</li>
+        <li>Ask for a copy of your data, or its deletion, whenever</li>
+      </ul>
+      <a class="btn btn-primary btn-full" href="#top" style="margin-top:26px"
+         onclick="document.getElementById('phone').focus();return false;">Get started</a>
+      <p class="hint" style="text-align:center">Verification first. We only charge a
+        number we know we can reach.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero{padding-block:clamp(48px,8vw,92px) clamp(56px,8vw,104px);position:relative;overflow:hidden}
+  .hero-inner{display:grid;gap:clamp(40px,5vw,72px);grid-template-columns:1.15fr .85fr;align-items:center}
+  @media (max-width:880px){
+    .hero-inner{grid-template-columns:1fr}
+    .hero-art{order:-1;justify-self:start}
+  }
+  .start{margin-top:36px;max-width:420px}
+  .hero-art{position:relative;display:grid;place-items:center;
+            padding:clamp(28px,4vw,52px);isolation:isolate}
+  .hero-art .mark{position:relative;z-index:2;filter:drop-shadow(0 26px 54px rgba(0,0,0,.66))}
+  /* The one lit moment, both lifted straight from the brand sheet: a pool of
+     light behind the mark, and the lit edge of a plane running under it. */
+  .glow{position:absolute;inset:-14%;z-index:1;
+        background:radial-gradient(48% 44% at 50% 42%, rgba(150,186,244,.26), transparent 72%)}
+  .horizon{position:absolute;left:-55%;right:-55%;top:66%;height:1px;z-index:1;
+           transform:rotate(-8.5deg);transform-origin:center;
+           background:linear-gradient(90deg,transparent 4%,rgba(207,228,255,.9) 46%,rgba(207,228,255,.18) 72%,transparent);
+           box-shadow:0 0 30px 1px rgba(207,228,255,.4)}
+  .horizon::after{content:"";position:absolute;inset:1px 0 auto;height:110px;
+                  background:linear-gradient(180deg,rgba(120,160,225,.13),transparent 78%)}
+
+  .mono-inline{font-family:var(--mono);font-size:.88em;color:var(--sky-dim);
+               background:var(--deep-2);padding:2px 7px;border-radius:5px;
+               border:1px solid var(--line-2);white-space:nowrap}
+
+  /* Numbered because these really are a sequence — you cannot pay before you
+     verify, and you cannot forward before you pay. */
+  .steps{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line-2);
+         border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  @media (min-width:800px){ .steps{grid-template-columns:repeat(3,1fr)} }
+  .steps li{background:var(--deep-2);padding:30px 26px 32px}
+  .steps .num{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.2em;
+              color:var(--sky-dim);margin-bottom:22px}
+  .steps p{margin:0;font-size:14.5px}
+
+  .feature{padding:26px 24px 28px}
+  .ftag{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
+        color:var(--sky-dim);margin:0 0 16px}
+  .feature p{margin:0;font-size:14.5px}
+
+  .price-row{display:grid;gap:clamp(32px,5vw,64px);grid-template-columns:1fr minmax(320px,.78fr);align-items:start}
+  @media (max-width:880px){ .price-row{grid-template-columns:1fr} }
+  .pricecard{padding:32px 30px 30px}
+  .amount{display:flex;align-items:baseline;gap:4px;font-family:var(--display);color:var(--bone)}
+  .rupee{font-size:30px;font-weight:200}
+  .figure{font-size:60px;font-weight:200;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+  .per{font-family:var(--body);font-size:15px;color:var(--steel);margin-left:8px}
+  .ticks{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+  .ticks li{position:relative;padding-left:26px;font-size:14.5px;color:var(--steel)}
+  .ticks li::before{content:"";position:absolute;left:4px;top:.42em;width:6px;height:11px;
+                    border-right:1.6px solid var(--sky);border-bottom:1.6px solid var(--sky);
+                    transform:rotate(42deg)}
+</style>
+{% endblock %}

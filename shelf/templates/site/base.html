@@ -1,0 +1,214 @@
+{# The public site. Dark-first and single-theme on purpose: the brand is a dark
+   identity (DEEP ground, metallic mark, SKY accent), and a light variant would
+   be a different design rather than the same one inverted. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1220">
+<meta name="description" content="Forward your notes, slides and deadlines to one WhatsApp contact. SHELF files them and gives them back when you ask — in plain words.">
+<title>{% block title %}SHELF{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a single 1080 column on a dark ground; one lit moment (the mark and
+     the horizon line) in the hero, everything below it quiet and rectilinear. */
+  :root{
+    color-scheme: dark;
+    --deep:#0B1220;        /* brand DEEP — the ground */
+    --deep-2:#0E1626;      /* raised surface */
+    --deep-3:#121C2F;      /* input wells, hover */
+    --bone:#F8F9FA;        /* brand BONE — primary text */
+    --sky:#CFE4FF;         /* brand SKY — accent */
+    --sky-dim:#7FA8DE;     /* accent at rest, for lines and small type */
+    --steel:#8A99B4;       /* secondary text: grey biased toward the navy */
+    --steel-2:#5E6C86;     /* tertiary */
+    --line:rgba(207,228,255,.13);
+    --line-2:rgba(207,228,255,.07);
+    --ok:#7FD4B0;
+    --warn:#E4B46A;
+
+    --display:"Sora", "Helvetica Neue", Arial, sans-serif;
+    --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --gutter:20px;
+    --radius:14px;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--deep); color:var(--bone);
+    font:16px/1.6 var(--body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit}
+  ::selection{background:var(--sky);color:var(--deep)}
+  :focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+  .wrap{max-width:1080px;margin:0 auto;padding-inline:var(--gutter)}
+  .narrow{max-width:620px;margin:0 auto;padding-inline:var(--gutter)}
+
+  /* ---- wordmark & marks ------------------------------------------------ */
+  .mark{display:block;width:100%;height:auto}
+  .lockup{display:flex;align-items:center;gap:14px;text-decoration:none}
+  .lockup .mark{width:34px;flex:none}
+  .wordmark{
+    font-family:var(--display);font-weight:300;letter-spacing:.42em;
+    text-indent:.42em;font-size:15px;color:var(--bone);white-space:nowrap;
+  }
+
+  /* ---- header ---------------------------------------------------------- */
+  header.bar{
+    position:sticky;top:0;z-index:30;
+    padding-top:env(safe-area-inset-top,0px);
+    background:color-mix(in srgb, var(--deep) 86%, transparent);
+    backdrop-filter:blur(14px) saturate(1.3);
+    border-bottom:1px solid var(--line-2);
+  }
+  header.bar .row{display:flex;align-items:center;gap:18px;padding-block:16px}
+  .spacer{flex:1}
+  .navlink{font-size:13.5px;color:var(--steel);text-decoration:none;white-space:nowrap}
+  .navlink:hover{color:var(--bone)}
+  @media (max-width:620px){ .navlink.hide-s{display:none} }
+
+  /* ---- buttons --------------------------------------------------------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font:500 15px/1 var(--body);padding:15px 22px;border-radius:10px;
+    border:1px solid transparent;cursor:pointer;text-decoration:none;
+    transition:transform .12s ease, background .12s ease, border-color .12s ease;
+  }
+  .btn-primary{background:var(--sky);color:#08101C;font-weight:600}
+  .btn-primary:hover{background:#E2EEFF;transform:translateY(-1px)}
+  .btn-ghost{border-color:var(--line);color:var(--bone);background:transparent}
+  .btn-ghost:hover{border-color:var(--sky-dim);background:var(--deep-2)}
+  .btn-full{width:100%}
+  .btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+  /* ---- type ------------------------------------------------------------ */
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--sky-dim);margin:0 0 20px;
+  }
+  h1{
+    font-family:var(--display);font-weight:200;
+    font-size:clamp(38px,6.4vw,68px);line-height:1.04;letter-spacing:-.025em;
+    margin:0 0 20px;text-wrap:balance;
+  }
+  h1 em{font-style:normal;color:var(--sky)}
+  h2{
+    font-family:var(--display);font-weight:300;
+    font-size:clamp(26px,3.6vw,38px);line-height:1.12;letter-spacing:-.02em;
+    margin:0 0 14px;text-wrap:balance;
+  }
+  h3{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em;margin:0 0 7px}
+  .lead{font-size:clamp(16.5px,1.6vw,19px);line-height:1.6;color:var(--steel);margin:0;max-width:56ch}
+  p{margin:0 0 14px;color:var(--steel)}
+  .section{padding-block:clamp(64px,9vw,112px);border-top:1px solid var(--line-2)}
+  .section-head{max-width:60ch;margin-bottom:44px}
+
+  /* ---- surfaces -------------------------------------------------------- */
+  .panel{background:var(--deep-2);border:1px solid var(--line);border-radius:var(--radius)}
+  .grid{display:grid;gap:18px;align-items:start}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(248px,1fr))}
+  .rule{height:1px;background:var(--line-2);border:0;margin:0}
+
+  label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+        text-transform:uppercase;color:var(--steel);margin-bottom:9px}
+  .field{display:flex;align-items:stretch;background:var(--deep-3);
+         border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .field:focus-within{border-color:var(--sky-dim)}
+  .field .cc{display:flex;align-items:center;padding-inline:15px;font-family:var(--mono);
+             font-size:15px;color:var(--steel);border-right:1px solid var(--line);background:rgba(0,0,0,.18)}
+  .field input{
+    flex:1;min-width:0;background:transparent;border:0;color:var(--bone);
+    font:400 17px/1 var(--body);padding:16px 15px;letter-spacing:.04em;
+  }
+  .field input:focus{outline:none}
+  .field input::placeholder{color:var(--steel-2)}
+  .hint{font-size:13px;color:var(--steel-2);margin:11px 0 0;line-height:1.5}
+  .error{background:rgba(228,110,96,.1);border:1px solid rgba(228,110,96,.32);
+         color:#F0A99E;border-radius:9px;padding:12px 14px;font-size:14px;margin-bottom:18px}
+
+  footer.site{border-top:1px solid var(--line-2);padding-block:44px 56px;
+              padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
+  footer.site .cols{display:flex;flex-wrap:wrap;gap:26px;align-items:center}
+  footer.site a{font-size:13.5px;color:var(--steel-2);text-decoration:none}
+  footer.site a:hover{color:var(--sky)}
+  .legal{font-size:12.5px;color:var(--steel-2);margin:22px 0 0;line-height:1.6}
+</style>
+</head>
+<body>
+
+{% macro logomark(size) -%}
+{# Isometric S: two extruded slabs, flush along a shared diagonal so the
+   silhouette is one continuous zigzag rather than two pieces near each other.
+   Upper slab lit from the top-left, lower slab in its shadow. Drawn rather
+   than imported so it holds up at 24px in the header and 200px in the hero. #}
+<svg class="mark" viewBox="2 30 118 102" aria-hidden="true" style="width:{{ size }}px">
+  <defs>
+    <linearGradient id="lit{{ size }}" x1=".1" y1="0" x2=".9" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".4" stop-color="#E4EDFB"/>
+      <stop offset="1" stop-color="#9DB4D2"/>
+    </linearGradient>
+    <linearGradient id="litFront{{ size }}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8195B4"/><stop offset="1" stop-color="#576B8B"/>
+    </linearGradient>
+    <linearGradient id="dim{{ size }}" x1=".1" y1="0" x2=".9" y2="1">
+      <stop offset="0" stop-color="#6E82A4"/><stop offset="1" stop-color="#37486A"/>
+    </linearGradient>
+    <linearGradient id="dimFront{{ size }}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2A3757"/><stop offset="1" stop-color="#17203A"/>
+    </linearGradient>
+  </defs>
+  <!-- lower slab -->
+  <polygon points="12,98 48,80 74,93 38,111" fill="url(#dim{{ size }})"/>
+  <polygon points="38,111 74,93 74,105 38,123" fill="url(#dimFront{{ size }})"/>
+  <polygon points="12,98 38,111 38,123 12,110" fill="#131E33"/>
+  <!-- upper slab, drawn last so it reads as nearer -->
+  <polygon points="48,56 84,38 110,51 74,69" fill="url(#lit{{ size }})"/>
+  <polygon points="74,69 110,51 110,63 74,81" fill="url(#litFront{{ size }})"/>
+  <polygon points="48,56 74,69 74,81 48,68" fill="#46587A"/>
+</svg>
+{%- endmacro %}
+
+<header class="bar">
+  <div class="wrap row">
+    <a class="lockup" href="/" aria-label="SHELF home">
+      {{ logomark(26) }}<span class="wordmark">SHELF</span>
+    </a>
+    <span class="spacer"></span>
+    <a class="navlink hide-s" href="/#how">How it works</a>
+    <a class="navlink hide-s" href="/#price">Price</a>
+    <a class="navlink" href="/files">Sign in</a>
+  </div>
+</header>
+
+{% block body %}{% endblock %}
+
+<footer class="site">
+  <div class="wrap">
+    <hr class="rule" style="margin-bottom:30px">
+    <div class="cols">
+      <a class="lockup" href="/" style="margin-right:auto">
+        {{ logomark(22) }}<span class="wordmark" style="font-size:13px">SHELF</span>
+      </a>
+      <a href="/terms">Terms</a>
+      <a href="/refunds">Refunds</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/cancel">Cancel</a>
+    </div>
+    <p class="legal">
+      Built for Indian college students. Prices in INR, inclusive of applicable taxes.
+      Your files stay yours — ask for a copy or a deletion at any time and we will do it.
+    </p>
+  </div>
+</footer>
+</body>
+</html>

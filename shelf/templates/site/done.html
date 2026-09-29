@@ -1,0 +1,57 @@
+{% extends "site/base.html" %}
+{% block title %}You're in{% endblock %}
+{% block body %}
+<section class="section" style="border-top:0;padding-block:clamp(56px,8vw,96px)">
+  <div class="narrow" style="text-align:center">
+    <div class="seal" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4.5 12.5 9.5 17.5 19.5 7"/>
+      </svg>
+    </div>
+    <p class="eyebrow" style="margin-top:26px">Step 03 of 03 · Start</p>
+    <h2>Payment received. Setting up your number.</h2>
+    <p class="lead" style="margin:0 auto 34px">
+      Access is granted by our payment provider's confirmation rather than by this page
+      loading, so give it a few seconds. Then say anything to the assistant — it will ask
+      which semester you're in and what you're studying, and that is the whole setup.
+    </p>
+
+    {% if whatsapp_url %}
+      <a class="btn btn-primary" href="{{ whatsapp_url }}" style="min-width:270px">
+        Open the assistant on WhatsApp
+      </a>
+      <p class="hint">Saved as <span class="num-inline">+91 {{ display_number }}</span> —
+        add it to your contacts so it is easy to find later.</p>
+    {% else %}
+      <div class="error" style="text-align:left">
+        We could not build your WhatsApp link. Email us and we will send it by hand —
+        your subscription is active either way.
+      </div>
+    {% endif %}
+
+    <div class="panel nextcard">
+      <p class="ftag">Try these first</p>
+      <ul class="tries">
+        <li><span class="q">“sem 5, DBMS OS CN Discrete Maths”</span><span class="a">sets you up</span></li>
+        <li><span class="q">forward a PDF captioned “DBMS unit 2”</span><span class="a">files it</span></li>
+        <li><span class="q">“send my dbms unit 2 notes”</span><span class="a">sends it back</span></li>
+        <li><span class="q">“OS lab record due friday 5pm”</span><span class="a">reminds you</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .seal{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto;
+        background:rgba(127,212,176,.12);border:1px solid rgba(127,212,176,.4);color:var(--ok)}
+  .num-inline{font-family:var(--mono);font-size:.9em;color:var(--bone);white-space:nowrap}
+  .nextcard{padding:26px 24px 24px;margin-top:44px;text-align:left}
+  .tries{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line-2)}
+  .tries li{background:var(--deep-2);display:flex;flex-wrap:wrap;gap:6px 14px;
+            align-items:baseline;justify-content:space-between;padding:13px 2px}
+  .tries .q{font-size:14.5px;color:var(--bone)}
+  .tries .a{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+            color:var(--sky-dim);white-space:nowrap}
+</style>
+{% endblock %}

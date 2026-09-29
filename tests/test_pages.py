@@ -221,9 +221,12 @@ class TestTheTree:
         ):
             assert web.get(page).status_code == 200, page
 
-    def test_the_root_redirects_home(self, web: TestClient, db_session: Session) -> None:
-        """The assistant's existing links point at /files; / must not 404."""
-        assert web.get("/").headers["location"] == "/files"
+    def test_the_root_is_the_public_site_not_the_drive(self, web: TestClient) -> None:
+        """One origin, two audiences: marketing at /, the signed-in drive at
+        /files. The links the assistant has already sent point at /files and at
+        /f/<token>, so neither may move."""
+        assert web.get("/").status_code == 200
+        assert "Forward it once" in web.get("/").text
 
     def test_the_shelves_are_always_all_three(
         self, web: TestClient, db_session: Session
@@ -368,3 +371,51 @@ class TestSomeoneElsesFiles:
         sign_in(web, db_session, mine)
 
         assert "2025 paper" not in web.get("/files/search?q=paper").text
+
+
+class TestThePublicSite:
+    """The pages a student sees before they are a student.
+
+    UI only so far: nothing here charges anybody or writes a users row, so
+    what these pin down is that the flow renders and that its order holds.
+    Verification comes before payment because the one state that must never
+    happen is a payment taken against a number we cannot reach -- the
+    assistant's whole response to an unknown number is silence, so that
+    failure is invisible from every other direction.
+    """
+
+    def test_the_landing_page_asks_for_a_number_before_any_price(
+        self, web: TestClient
+    ) -> None:
+        page = web.get("/").text
+        assert page.index('id="phone"') < page.index("Get started")
+        assert "Verify this number" in page
+
+    def test_the_verify_page_carries_the_code_into_the_deep_link(
+        self, web: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The student presses send, nothing more. A code they have to retype
+        into WhatsApp is a code most of them will mistype."""
+        monkeypatch.setattr(settings, "whatsapp_display_number", "919380651594")
+        page = web.post("/verify", data={"phone": "9876543210"}).text
+
+        assert "wa.me/919380651594?text=" in page
+        assert "98765 43210" in page  # their number, read back the way they say it
+
+    def test_no_configured_number_still_renders_a_usable_page(
+        self, web: TestClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """A dead deep link is worse than none: the fallback tells them what to
+        send and to whom."""
+        monkeypatch.setattr(settings, "whatsapp_display_number", "")
+        page = web.post("/verify", data={"phone": "9876543210"}).text
+
+        assert "wa.me" not in page
+        assert "send exactly" in page
+
+    def test_done_promises_nothing_it_cannot_keep(self, web: TestClient) -> None:
+        """Access is granted by the payment webhook, not by this page loading.
+        The two are seconds apart and occasionally are not."""
+        page = web.get("/done").text
+        assert "Setting up your number" in page
+        assert "Payment received" in page

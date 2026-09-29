@@ -47,8 +47,11 @@ class Settings(BaseSettings):
     # or a student in grace is answered in chat and locked out of their files.
     grace_days: int = 3
 
-    # Where the assistant lives, for the "ask for a new link" dead ends.
+    # Where the assistant lives: the dialable number students message, used for
+    # the sign-up deep link and the "ask for a new link" dead ends. Digits only,
+    # 91XXXXXXXXXX -- the same shape ck_users_ph_no_digits enforces on the row.
     whatsapp_chat_url: str = ""
+    whatsapp_display_number: str = ""
 
     r2_account_id: str = ""
     r2_access_key_id: str = ""

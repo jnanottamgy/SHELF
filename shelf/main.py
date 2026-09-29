@@ -15,29 +15,23 @@ against one database is how a half-applied schema happens.
 import logging
 
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse, Response
 from sqlalchemy import text
 
 from shelf.db import DbSession
 from shelf.logging_config import configure_logging
 from shelf.router import NotSignedIn, entry, not_signed_in
 from shelf.router import router as files_router
+from shelf.site import router as site_router
 
 configure_logging()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="SHELF", docs_url=None, redoc_url=None)
+app.include_router(site_router)
 app.include_router(files_router)
 app.include_router(entry)
 app.add_exception_handler(NotSignedIn, not_signed_in)
 logger.info("shelf starting")
-
-
-@app.get("/", include_in_schema=False)
-def root() -> Response:
-    """One canonical home. The paths keep their /files prefix because the
-    links the assistant has already sent point at them."""
-    return RedirectResponse(url="/files", status_code=307)
 
 
 @app.get("/health")
