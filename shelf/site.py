@@ -1,9 +1,8 @@
 """The public site: what a student sees before they are a student.
 
-**UI only, so far.** These routes render; none of them charge anybody or write
-a ``users`` row. That is deliberate rather than unfinished -- see the note on
-ownership below -- and it means the whole flow can be looked at and argued
-with before any money moves.
+**Verification is wired; payment is not.** A number can be claimed and proved
+here today. Nothing charges anybody and nothing writes a ``users`` row -- see
+the note on ownership below.
 
 The flow is verify, then pay, then hand off to WhatsApp, and the order is the
 point. CLAUDE.md records the one state that must never happen: a payment taken
@@ -27,6 +26,7 @@ stays where it is.
 """
 
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import quote
 
@@ -34,7 +34,9 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from shelf import signup
 from shelf.config import settings
+from shelf.db import DbSession
 
 logger = logging.getLogger(__name__)
 
@@ -45,12 +47,6 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 #: because the page shows rupees; paise is the unit Razorpay bills in and the
 #: unit that write should use.
 RUPEES = 89
-
-#: Long enough that a lock-screen glance is not enough to act on, short enough
-#: to type. Unambiguous alphabet: no O/0, no I/1.
-CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-CODE_LENGTH = 6
-CODE_MINUTES = 10
 
 
 def _page(request: Request, name: str, **context: object) -> HTMLResponse:
@@ -71,26 +67,78 @@ def landing(request: Request) -> HTMLResponse:
 
 
 @router.post("/verify", response_class=HTMLResponse)
-def verify(request: Request, phone: str = Form(default="")) -> HTMLResponse:
-    """Show the code and the pre-filled WhatsApp link.
+def verify(request: Request, db: DbSession, phone: str = Form(default="")) -> HTMLResponse:
+    """Claim the number and show the code to send.
 
-    Not wired: the code below is fixed, nothing is stored, and no message is
-    watched for. What the page proves today is the shape of the step.
+    A number that already belongs to a customer is sent back to the landing
+    page rather than charged again -- and told so plainly, because "nothing
+    happened" is how a paying student concludes the product is broken.
     """
-    code = "K7QX4M"  # fixed while this is UI only
-    number = settings.whatsapp_display_number or ""
+    if signup.already_a_customer(db, phone) is not None:
+        return _page(
+            request,
+            "landing.html",
+            phone=phone,
+            error=(
+                "That number already has a subscription. Message the assistant "
+                "on WhatsApp and it will pick up where you left off."
+            ),
+        )
+
+    try:
+        code, normalised = signup.claim(db, phone, datetime.now(tz=UTC))
+    except signup.UnverifiableNumber as refused:
+        # Refused now rather than after a payment: a number we cannot reach is
+        # a number we must not take money for.
+        return _page(request, "landing.html", phone=phone, error=str(refused))
+    db.commit()
+
+    number = settings.whatsapp_display_number
     return _page(
         request,
         "verify.html",
         code=code,
-        pretty_phone=_pretty(phone) or "98765 43210",
-        display_number=_pretty(number) or "93806 51594",
-        expires_minutes=CODE_MINUTES,
+        pretty_phone=_pretty(normalised),
+        display_number=_pretty(number),
+        expires_minutes=int(signup.TTL.total_seconds() // 60),
         # The deep link carries the code, so the student only presses send.
-        whatsapp_url=(
-            f"https://wa.me/{number}?text={quote(code)}" if number else ""
-        ),
+        whatsapp_url=f"https://wa.me/{number}?text={quote(code)}" if number else "",
     )
+
+
+@router.get("/verify/{code}/state")
+def verify_state(code: str, db: DbSession) -> dict[str, str]:
+    """What the page polls. ``waiting``, ``verified`` or ``expired``.
+
+    Keyed by the code, so polling reveals nothing the caller did not already
+    hold -- they have the code because the page gave it to them. Answering by
+    phone number instead would turn this into a way to ask whether a stranger
+    is midway through signing up.
+    """
+    return {"state": signup.state_of(db, code, datetime.now(tz=UTC))}
+
+
+@router.get("/checkout", response_class=HTMLResponse)
+def checkout(request: Request, db: DbSession, code: str = "") -> HTMLResponse:
+    """The gate. Nothing unverified gets past here toward a payment.
+
+    Gating the *start* of checkout rather than provisioning is deliberate: if
+    nothing unverified can reach the payment provider, everything the webhook
+    later sees is verified by construction -- and the webhook stays permissive,
+    because a payment taken and not recorded is the one state worse than an
+    unverified signup.
+
+    Not wired to Razorpay yet. When it is, this is where the subscription is
+    created and the student is handed over; the ``users`` row still comes from
+    the webhook, in the assistant's repository, and not from here.
+    """
+    if not code or signup.state_of(db, code, datetime.now(tz=UTC)) != "verified":
+        return _page(
+            request,
+            "landing.html",
+            error="We could not confirm that number. Start again and we'll send a fresh code.",
+        )
+    return _page(request, "checkout.html")
 
 
 @router.get("/done", response_class=HTMLResponse)

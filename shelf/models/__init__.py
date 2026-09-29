@@ -11,13 +11,19 @@ step with the database, silently, on a deploy nobody thought concerned SHELF.
 and fails if a column read here has moved. A red build is the whole point; the
 alternative is a 500 that only some students see.
 
-Only the tables SHELF reads are mirrored. Adding one means adding the drift
+Mostly read-only: ``signup_codes`` is the one table this service also
+writes, and it writes a *claim* rather than a credential -- see
+``shelf/signup.py`` for why that does not make this service able to hand out
+access.
+
+Only the tables SHELF touches are mirrored. Adding one means adding the drift
 test's coverage with it.
 """
 
 from shelf.models.base import Base
 from shelf.models.deadlines import Deadline
 from shelf.models.resources import Resource
+from shelf.models.signup_codes import SignupCode
 from shelf.models.subjects import Subject
 from shelf.models.terms import Term
 from shelf.models.user import User
@@ -27,6 +33,7 @@ __all__ = [
     "Base",
     "Deadline",
     "Resource",
+    "SignupCode",
     "Subject",
     "Term",
     "User",

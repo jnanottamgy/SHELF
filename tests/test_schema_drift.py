@@ -21,7 +21,10 @@ from sqlalchemy import Engine, inspect
 
 from shelf.models import Base
 
-MIRRORED = ("users", "terms", "subjects", "resources", "deadlines", "web_sessions")
+MIRRORED = (
+    "users", "terms", "subjects", "resources", "deadlines", "web_sessions",
+    "signup_codes",
+)
 
 
 @pytest.fixture(scope="module")

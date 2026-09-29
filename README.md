@@ -17,7 +17,7 @@ on a page.
 uv sync
 cp .env.example .env          # point DATABASE_URL at the assistant's database
 uv run uvicorn shelf.main:app --reload
-uv run pytest                 # 32 tests
+uv run pytest                 # 44 tests
 ```
 
 ---
@@ -45,9 +45,55 @@ split is deliberate: the process exposed to the open internet is not the one
 that can create access. There is a test asserting `issue_link` does not exist
 here, so nobody adds it back for convenience.
 
+**It writes exactly one thing.** A `signup_codes` row — a *claim* on a phone
+number, which is evidence of nothing. The proof is a WhatsApp message arriving
+from that number carrying the code, and only the assistant can observe one.
+`users.paid_until` is still the credential and is still written only by the
+payment webhook, so writing claims here does not make this service able to
+hand out access. See [Signing up](#signing-up).
+
 **It holds no Meta token, no LLM key and no payment secret.** Not because they
 are guarded, but because they are absent — this service sends no messages and
 takes no money. A process that cannot reach Meta cannot leak a Meta token.
+
+---
+
+## Signing up
+
+A number is proved reachable **before** money is taken against it. The
+assistant answers an unknown number with silence, so a payment captured
+against a mistyped number is invisible from every direction — no bounce, no
+error, nothing until the student gives up. Verifying first makes that state
+unreachable rather than merely alertable.
+
+1. The student enters their number here. We normalise it and write a
+   `signup_codes` row: a six-character code, bound to that number, good for
+   ten minutes.
+2. They send that code to the assistant **from their own WhatsApp**. The
+   message arriving from that number is the proof.
+3. The assistant marks the row verified and confirms in the chat. This page
+   is polling and moves them on.
+
+**The direction is the security property.** A code travelling *to* a phone can
+be read off a lock screen or talked out of someone on a call; a code
+travelling *from* one cannot, because possession of the phone is the act
+itself. It also costs nothing — the student speaks first, so the confirmation
+is inside WhatsApp's service window and needs no approved template — and it
+needs no SMS vendor.
+
+Polling is keyed by the **code**, never by the number. Someone holding a code
+was given it by this page, so asking about it tells them nothing new; keying
+it by number would make it a way to ask whether a stranger is signing up.
+
+`/checkout` is the gate: nothing unverified gets past it toward a payment
+provider. Everything the webhook later sees is therefore verified by
+construction, and the webhook stays permissive — a payment taken and not
+recorded is the one state worse than an unverified signup.
+
+The code alphabet and TTL are **this repository's** choice. The assistant does
+not validate against them, deliberately: a validator there that disagreed with
+the generator here would mean no code ever verifies, silently, with neither
+repository's tests noticing. The database lookup is the validation.
 
 ---
 
@@ -141,8 +187,9 @@ every byte handed over.
 
 ## Schema
 
-`shelf/models/` mirrors six tables — `users`, `terms`, `subjects`, `resources`,
-`deadlines`, `web_sessions` — and owns none of them.
+`shelf/models/` mirrors seven tables — `users`, `terms`, `subjects`,
+`resources`, `deadlines`, `web_sessions`, `signup_codes` — and owns none of
+them. It writes only to `signup_codes`, and only claims.
 
 Copies rot, and this one would rot *silently*: a migration lands in the
 assistant, nobody thinks it concerns SHELF, and the first symptom is a 500 on

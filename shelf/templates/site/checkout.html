@@ -1,0 +1,28 @@
+{% extends "site/base.html" %}
+{% block title %}Payment{% endblock %}
+{% block body %}
+<section class="section" style="border-top:0;padding-block:clamp(56px,8vw,96px)">
+  <div class="narrow" style="text-align:center">
+    <p class="eyebrow">Step 02 of 03 · Pay</p>
+    <h2>Number verified.</h2>
+    <p class="lead" style="margin:0 auto 30px">
+      This is where Razorpay takes over. The checkout is not connected yet —
+      when it is, the subscription is created here and your access is granted by
+      the payment confirmation, not by this page.
+    </p>
+    <div class="panel" style="padding:26px 24px;text-align:left;max-width:380px;margin:0 auto">
+      <div class="amount" style="justify-content:center">
+        <span class="rupee">₹</span><span class="figure">{{ rupees }}</span>
+        <span class="per">/ month</span>
+      </div>
+    </div>
+    <p class="hint">Nothing has been charged.</p>
+  </div>
+</section>
+<style>
+  .amount{display:flex;align-items:baseline;gap:4px;font-family:var(--display);color:var(--bone)}
+  .rupee{font-size:26px;font-weight:200}
+  .figure{font-size:52px;font-weight:200;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+  .per{font-family:var(--body);font-size:15px;color:var(--steel);margin-left:8px}
+</style>
+{% endblock %}

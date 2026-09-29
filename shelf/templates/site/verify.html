@@ -27,7 +27,22 @@
 
     <div class="waiting" id="waiting">
       <span class="pulse" aria-hidden="true"></span>
-      <span>Waiting for your message…</span>
+      <span id="waiting-text">Waiting for your message…</span>
+    </div>
+
+    <div class="verified" id="verified" hidden>
+      <span class="seal-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+             stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.5 12.5 9.5 17.5 19.5 7"/>
+        </svg>
+      </span>
+      <span>Number verified. Taking you to payment…</span>
+    </div>
+
+    <div class="error" id="expired" hidden style="margin-top:26px">
+      That code has expired. <a href="/" style="color:var(--sky)">Start again</a> and
+      we'll give you a fresh one.
     </div>
 
     <details class="fallback">
@@ -43,6 +58,47 @@
   </div>
 </section>
 
+<script>
+  // Polls the code, not the number: someone holding this code was given it by
+  // this page, so asking about it tells them nothing new. Asking by phone
+  // number would be a way to find out whether a stranger is signing up.
+  (function () {
+    var code = {{ code | tojson }};
+    var waiting = document.getElementById("waiting");
+    var verified = document.getElementById("verified");
+    var text = document.getElementById("waiting-text");
+    var stop = false;
+
+    function settle(state) {
+      if (state === "verified") {
+        stop = true;
+        waiting.hidden = true;
+        verified.hidden = false;
+        // The page owns the next step, so the student never has to come back
+        // and find it themselves.
+        setTimeout(function () { window.location.assign("/checkout?code=" + code); }, 900);
+      } else if (state === "expired") {
+        stop = true;
+        waiting.hidden = true;
+        text.textContent = "";
+        document.getElementById("expired").hidden = false;
+      }
+    }
+
+    function poll() {
+      if (stop) return;
+      fetch("/verify/" + encodeURIComponent(code) + "/state", { cache: "no-store" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { if (d) settle(d.state); })
+        // A failed poll is not a failed verification: keep asking rather than
+        // telling the student something went wrong when it probably did not.
+        .catch(function () {})
+        .then(function () { if (!stop) setTimeout(poll, 2000); });
+    }
+    setTimeout(poll, 1500);
+  })();
+</script>
+
 <style>
   .num-inline{font-family:var(--mono);font-size:.9em;color:var(--bone);white-space:nowrap}
   .codecard{padding:28px 26px 26px;text-align:center}
@@ -57,6 +113,10 @@
   .pulse{width:8px;height:8px;border-radius:50%;background:var(--sky);flex:none;
          animation:breathe 1.8s ease-in-out infinite}
   @keyframes breathe{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+  .verified{display:flex;align-items:center;justify-content:center;gap:11px;
+            margin-top:26px;font-size:14.5px;color:var(--ok)}
+  .seal-sm{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;
+           background:rgba(127,212,176,.14);border:1px solid rgba(127,212,176,.45)}
   .fallback{margin-top:30px;border-top:1px solid var(--line-2);padding-top:20px}
   .fallback summary{cursor:pointer;font-size:14px;color:var(--steel);list-style:none}
   .fallback summary::-webkit-details-marker{display:none}

@@ -14,6 +14,7 @@
 -- fails when a column SHELF reads is missing from the live database, but it
 -- cannot tell you about a column that was added and ought to be mirrored.
 
+
 CREATE TYPE public.message_direction AS ENUM (
     'inbound',
     'outbound'
@@ -147,6 +148,15 @@ ALTER TABLE public.resources ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     CACHE 1
 );
 
+CREATE TABLE public.signup_codes (
+    code text NOT NULL,
+    ph_no text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    verified_at timestamp with time zone,
+    CONSTRAINT ck_signup_codes_ph_no_digits CHECK ((ph_no ~ '^91[0-9]{10}$'::text))
+);
+
 CREATE TABLE public.subject_aliases (
     id bigint NOT NULL,
     subject_id bigint NOT NULL,
@@ -265,6 +275,9 @@ ALTER TABLE ONLY public.reminders
 ALTER TABLE ONLY public.resources
     ADD CONSTRAINT resources_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.signup_codes
+    ADD CONSTRAINT signup_codes_pkey PRIMARY KEY (code);
+
 ALTER TABLE ONLY public.subject_aliases
     ADD CONSTRAINT subject_aliases_pkey PRIMARY KEY (id);
 
@@ -292,6 +305,8 @@ ALTER TABLE ONLY public.web_sessions
 CREATE INDEX ix_messages_user_id_id ON public.messages USING btree (user_id, id);
 
 CREATE INDEX ix_reminders_status_fire_at ON public.reminders USING btree (status, fire_at);
+
+CREATE INDEX ix_signup_codes_ph_no ON public.signup_codes USING btree (ph_no);
 
 CREATE INDEX ix_subject_aliases_alias ON public.subject_aliases USING btree (alias);
 

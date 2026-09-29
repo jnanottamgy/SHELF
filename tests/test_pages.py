@@ -419,3 +419,103 @@ class TestThePublicSite:
         page = web.get("/done").text
         assert "Setting up your number" in page
         assert "Payment received" in page
+
+
+class TestTheSignupHandshake:
+    """Claiming a number, and the gate that keeps an unproved one out.
+
+    The property the whole path exists for: a payment is never taken against a
+    number we cannot reach. The assistant answers an unknown number with
+    silence, so that failure is invisible from every direction.
+
+    Redemption itself is the assistant's half and is tested there -- what these
+    pin down is that this service writes a claim and nothing more, and that
+    nothing unverified gets past the gate.
+    """
+
+    def test_submitting_a_number_claims_a_code(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        from shelf.models import SignupCode
+
+        page = web.post("/verify", data={"phone": "98765 43210"}).text
+        row = db_session.scalar(select(SignupCode).where(SignupCode.ph_no == "919876543210"))
+
+        assert row is not None
+        assert row.verified_at is None  # a claim, never a credential
+        assert row.code in page
+
+    def test_a_number_we_could_never_reach_is_refused_before_payment(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        from shelf.models import SignupCode
+
+        page = web.post("/verify", data={"phone": "12345"}).text
+
+        assert "Verify this number" in page  # back on the landing page
+        assert db_session.scalar(select(SignupCode)) is None
+
+    def test_an_existing_customer_is_not_charged_twice(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        """"Nothing happened" is how a paying student decides it is broken."""
+        make_student(db_session, "919876543210")
+        page = web.post("/verify", data={"phone": "9876543210"}).text
+
+        assert "already has a subscription" in page
+
+    def test_the_state_endpoint_answers_by_code_not_by_number(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        """Polling must reveal nothing the caller did not already hold. By
+        number, this would be a way to ask whether a stranger is signing up."""
+        from shelf.models import SignupCode
+
+        web.post("/verify", data={"phone": "9876543210"})
+        row = db_session.scalar(select(SignupCode))
+        assert row is not None
+
+        assert web.get(f"/verify/{row.code}/state").json() == {"state": "waiting"}
+        assert web.get("/verify/NOTACODE/state").json() == {"state": "expired"}
+
+    def test_a_verified_code_reads_as_verified(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        from shelf.models import SignupCode
+
+        web.post("/verify", data={"phone": "9876543210"})
+        row = db_session.scalar(select(SignupCode))
+        assert row is not None
+        row.verified_at = datetime.now(tz=UTC)  # what the assistant does
+        db_session.commit()
+
+        assert web.get(f"/verify/{row.code}/state").json() == {"state": "verified"}
+
+    def test_checkout_refuses_an_unverified_code(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        """The gate. Nothing unverified reaches a payment provider, so
+        everything the webhook later sees is verified by construction."""
+        from shelf.models import SignupCode
+
+        web.post("/verify", data={"phone": "9876543210"})
+        row = db_session.scalar(select(SignupCode))
+        assert row is not None
+
+        assert "could not confirm" in web.get(f"/checkout?code={row.code}").text
+        assert "could not confirm" in web.get("/checkout").text
+
+    def test_checkout_admits_a_verified_one(
+        self, web: TestClient, db_session: Session
+    ) -> None:
+        from shelf.models import SignupCode
+
+        web.post("/verify", data={"phone": "9876543210"})
+        row = db_session.scalar(select(SignupCode))
+        assert row is not None
+        row.verified_at = datetime.now(tz=UTC)
+        db_session.commit()
+
+        page = web.get(f"/checkout?code={row.code}").text
+        assert "Number verified" in page
+        assert "Nothing has been charged" in page
