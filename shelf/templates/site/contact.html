@@ -1,0 +1,68 @@
+{% extends "site/legal.html" %}
+{% set kicker = "Contact" %}
+{% block title %}Contact us{% endblock %}
+{% block heading %}Getting hold of us{% endblock %}
+{% block document %}
+
+<section>
+  <h2>For anything about your account</h2>
+  <p>Message the assistant on WhatsApp. It is the fastest route, and it already
+    knows which account you are.</p>
+  {% if whatsapp_url %}
+  <p><a class="btn btn-primary" href="{{ whatsapp_url }}"
+        style="margin:6px 0 4px">Open WhatsApp</a></p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>By email</h2>
+  <div class="pairs" style="display:grid">
+    <dl class="pairs">
+      <dt>Support</dt><dd>{{ d.support_email }} — billing, refunds, anything not working</dd>
+      <dt>Privacy</dt><dd>{{ d.grievance_email }} — a copy of your data, corrections, deletion</dd>
+      <dt>Phone</dt><dd>{{ d.support_phone }}</dd>
+    </dl>
+  </div>
+  <p class="hint">Mention the number your subscription is on, so we can find you
+    without asking you to prove it twice.</p>
+</section>
+
+<section>
+  <h2>How quickly we answer</h2>
+  <div class="wrapper">
+  <table class="datatable">
+    <thead><tr><th>What</th><th>Acknowledged</th><th>Resolved</th></tr></thead>
+    <tbody>
+      <tr><td>Something is broken</td><td>Same working day</td><td>As fast as we can</td></tr>
+      <tr><td>Refund request</td><td>48 hours</td><td>5 working days</td></tr>
+      <tr><td>Copy of your data</td><td>48 hours</td><td>{{ d.rights_response_days }} days</td></tr>
+      <tr><td>Deletion request</td><td>48 hours</td><td>{{ d.rights_response_days }} days</td></tr>
+      <tr><td>Grievance</td><td>48 hours</td><td>{{ d.rights_response_days }} days</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
+  <h2>Grievance Officer</h2>
+  <p>Named under the Digital Personal Data Protection Act, 2023 and the
+    Consumer Protection (E-Commerce) Rules, 2020.</p>
+  <dl class="pairs">
+    <dt>Name</dt><dd>{{ d.grievance_officer }}</dd>
+    <dt>Email</dt><dd>{{ d.grievance_email }}</dd>
+    <dt>Address</dt><dd>{{ d.address }}</dd>
+  </dl>
+  <p>If we do not resolve a data matter to your satisfaction, you may complain
+    to the <strong>Data Protection Board of India</strong>. For anything else,
+    a Consumer Commission.</p>
+</section>
+
+<section>
+  <h2>Registered details</h2>
+  <dl class="pairs">
+    <dt>Entity</dt><dd>{{ d.entity }} ({{ d.entity_type }})</dd>
+    <dt>Address</dt><dd>{{ d.address }}</dd>
+    {% if d.is_gst_registered %}<dt>GSTIN</dt><dd>{{ d.gst_number }}</dd>{% endif %}
+  </dl>
+</section>
+{% endblock %}

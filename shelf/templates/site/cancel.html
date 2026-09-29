@@ -1,0 +1,51 @@
+{% extends "site/legal.html" %}
+{% set kicker = "How to" %}
+{% block title %}Cancel your subscription{% endblock %}
+{% block heading %}Cancelling{% endblock %}
+{% block document %}
+
+<section>
+  <h2>Send one message</h2>
+  <p>Open WhatsApp and send the assistant <strong>"cancel my subscription"</strong>.
+    It stops the recurring mandate straight away and confirms in the chat.</p>
+  {% if whatsapp_url %}
+  <p><a class="btn btn-primary" href="{{ whatsapp_url }}"
+        style="margin:6px 0 4px">Open WhatsApp</a></p>
+  {% endif %}
+  <p class="hint">No form to find, nothing to click through, and nobody asking
+    you to reconsider.</p>
+</section>
+
+<section>
+  <h2>Why it happens there and not here</h2>
+  <p>Your subscription is tied to your phone number, and that number is the
+    only identity this service has. A number typed into a web form proves
+    nothing about who typed it — a page like this could cancel a stranger's
+    subscription for them. A message from the phone itself cannot.</p>
+  <p>The same reasoning is why signing in to your files starts with a link the
+    assistant sends you, rather than a password.</p>
+</section>
+
+<section>
+  <h2>What happens next</h2>
+  <ul>
+    <li>No further charges, from that moment.</li>
+    <li>Full access until the end of the period you already paid for.</li>
+    <li><strong>Nothing you have stored is deleted.</strong> It waits 90 days in
+      case you come back, then goes automatically.</li>
+    <li>Want it gone sooner? Email {{ d.support_email }} and ask — we delete
+      everything, from the database and from file storage both.</li>
+  </ul>
+  <p>The full terms are on the
+    <a href="/refunds">cancellation and refunds page</a>, including when a
+    payment comes back.</p>
+</section>
+
+<section>
+  <h2>If the message does not work</h2>
+  <p>Email <strong>{{ d.support_email }}</strong> with your number. We cancel it
+    by hand the same working day and confirm by reply. If you have lost access
+    to the number itself, say so — we will verify another way rather than leave
+    you paying for something you cannot reach.</p>
+</section>
+{% endblock %}

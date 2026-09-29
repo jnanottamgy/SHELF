@@ -1,0 +1,102 @@
+{# The layout every policy page shares. One place for the reading measure, the
+   effective date and the incomplete-policy warning, so five documents cannot
+   drift into five different shapes. #}
+{% extends "site/base.html" %}
+{% block body %}
+<article class="legal">
+  <div class="legal-head">
+    <p class="eyebrow">{{ kicker }}</p>
+    <h1 class="legal-title">{% block heading %}{% endblock %}</h1>
+    <p class="effective">
+      In effect from {{ d.effective_date }} ·
+      Operated by {{ d.entity }} ({{ d.entity_type }}), India
+    </p>
+  </div>
+
+  {% if blanks %}
+  <div class="draft">
+    <strong>Not finished.</strong> These details are still blank, so this page
+    names nobody where it should: {{ blanks|join(', ')|upper }}. The site
+    refuses to start in production while that is true.
+  </div>
+  {% endif %}
+
+  {% block document %}{% endblock %}
+
+  <div class="legal-foot">
+    <h2>Getting in touch</h2>
+    <dl class="pairs">
+      <dt>Entity</dt><dd>{{ d.entity }} ({{ d.entity_type }})</dd>
+      <dt>Address</dt><dd>{{ d.address }}</dd>
+      <dt>Email</dt><dd>{{ d.support_email }}</dd>
+      <dt>Phone</dt><dd>{{ d.support_phone }}</dd>
+      <dt>Grievance Officer</dt><dd>{{ d.grievance_officer }} · {{ d.grievance_email }}</dd>
+      {% if d.is_gst_registered %}<dt>GSTIN</dt><dd>{{ d.gst_number }}</dd>{% endif %}
+    </dl>
+    <p class="hint">Write from your registered number's email or mention the
+      number, so we can find your account without asking you to prove it twice.</p>
+  </div>
+</article>
+
+<style>
+  .legal{max-width:720px;margin:0 auto;padding-inline:var(--gutter);
+         padding-block:clamp(44px,6vw,76px) clamp(48px,7vw,88px)}
+  .legal-head{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:8px}
+  .legal-title{font-family:var(--display);font-weight:200;
+               font-size:clamp(30px,4.6vw,44px);line-height:1.06;letter-spacing:-.022em;
+               margin:0 0 12px;text-wrap:balance}
+  .effective{font-family:var(--mono);font-size:12px;color:var(--steel-2);
+             margin:0;line-height:1.7}
+  .draft{background:rgba(228,180,106,.09);border:1px solid rgba(228,180,106,.34);
+         color:#E8C288;border-radius:10px;padding:14px 16px;font-size:14px;
+         line-height:1.6;margin:26px 0 0}
+
+  /* Numbered, because a policy is cited by clause and "see section 7" has to
+     mean something when somebody emails about it. */
+  .legal section{counter-increment:clause;padding-top:34px}
+  .legal{counter-reset:clause}
+  .legal section > h2{font-family:var(--display);font-weight:600;font-size:18px;
+                      letter-spacing:-.01em;color:var(--bone);margin:0 0 14px;
+                      display:flex;gap:12px;align-items:baseline}
+  .legal section > h2::before{content:counter(clause);font-family:var(--mono);
+                              font-size:12px;font-weight:400;color:var(--sky-dim);
+                              flex:none;min-width:1.4em}
+  .legal h3{font-family:var(--body);font-weight:600;font-size:15px;color:var(--bone);
+            margin:20px 0 7px}
+  .legal p, .legal li{font-size:15px;line-height:1.72;color:var(--steel)}
+  .legal p{margin:0 0 13px}
+  .legal strong{color:var(--bone);font-weight:600}
+  .legal ul{margin:0 0 13px;padding-left:20px;display:grid;gap:7px}
+  .legal a{color:var(--sky)}
+  .legal section > *:not(h2){margin-left:calc(1.4em + 12px)}
+  @media (max-width:560px){ .legal section > *:not(h2){margin-left:0} }
+
+  /* Definition-style rows: the shape a policy's "what / why / how long" table
+     wants, and it stays readable when it stacks on a phone. */
+  .pairs{display:grid;grid-template-columns:auto 1fr;gap:9px 22px;margin:0 0 6px}
+  .pairs dt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+            text-transform:uppercase;color:var(--steel-2);padding-top:3px}
+  .pairs dd{margin:0;font-size:14.5px;color:var(--steel)}
+  @media (max-width:560px){
+    .pairs{grid-template-columns:1fr;gap:3px 0}
+    .pairs dd{margin-bottom:12px}
+  }
+
+  .datatable{width:100%;border-collapse:collapse;margin:4px 0 16px;font-size:14px}
+  .datatable th{text-align:left;font-family:var(--mono);font-size:10.5px;
+                letter-spacing:.16em;text-transform:uppercase;color:var(--steel-2);
+                font-weight:500;padding:0 14px 9px 0;border-bottom:1px solid var(--line)}
+  .datatable td{padding:11px 14px 11px 0;border-bottom:1px solid var(--line-2);
+                vertical-align:top;color:var(--steel);line-height:1.6}
+  .datatable td:first-child{color:var(--bone);font-weight:500;white-space:nowrap}
+  .wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  .legal-foot{margin-top:52px;padding-top:30px;border-top:1px solid var(--line)}
+  .legal-foot h2{font-family:var(--display);font-weight:600;font-size:17px;
+                 color:var(--bone);margin:0 0 18px}
+  .legal-foot .hint{margin-top:16px}
+  .callout{background:var(--deep-2);border:1px solid var(--line);border-left:2px solid var(--sky);
+           border-radius:0 10px 10px 0;padding:16px 18px;margin:4px 0 16px}
+  .callout p:last-child{margin-bottom:0}
+</style>
+{% endblock %}

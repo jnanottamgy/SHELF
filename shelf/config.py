@@ -53,6 +53,35 @@ class Settings(BaseSettings):
     whatsapp_chat_url: str = ""
     whatsapp_display_number: str = ""
 
+    # --- legal identity ------------------------------------------------
+    # Every one of these appears verbatim on a published policy page, and an
+    # unfilled one is a policy that names nobody. ``shelf/legal.py`` refuses to
+    # start a production process while any is blank -- a privacy policy reading
+    # "[GRIEVANCE OFFICER NAME]" is worse than none, because it is a visible
+    # admission that nobody read it.
+    legal_entity: str = ""            # the registered name that takes the money
+    legal_entity_type: str = ""       # sole proprietorship / LLP / private limited
+    legal_address: str = ""           # registered address, as on the GST or MCA record
+    support_email: str = ""           # answered by a person
+    support_phone: str = ""           # required on a Razorpay-facing contact page
+    # DPDP s.13 and the Consumer Protection (E-Commerce) Rules both require a
+    # named human, reachable, who answers grievances within a stated window.
+    grievance_officer: str = ""
+    grievance_email: str = ""
+    jurisdiction_city: str = ""       # courts named in the terms
+    # Empty means not GST-registered. If set, it is printed on the pricing and
+    # contact pages, and the price must state whether it includes tax.
+    gst_number: str = ""
+    price_includes_gst: bool = True
+    # Changed whenever a policy changes in substance. Students are told what
+    # changed, and when, rather than being asked to diff two pages.
+    policy_effective_date: str = ""   # YYYY-MM-DD
+    # Days to answer a rights request. DPDP does not fix a number; saying one
+    # and meeting it is the point.
+    rights_response_days: int = 30
+    # Days from first payment in which a first subscription is fully refundable.
+    refund_window_days: int = 7
+
     r2_account_id: str = ""
     r2_access_key_id: str = ""
     r2_secret_access_key: str = ""

@@ -31,10 +31,10 @@ from pathlib import Path
 from urllib.parse import quote
 
 from fastapi import APIRouter, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from shelf import signup
+from shelf import legal, signup
 from shelf.config import settings
 from shelf.db import DbSession
 
@@ -50,8 +50,20 @@ RUPEES = 89
 
 
 def _page(request: Request, name: str, **context: object) -> HTMLResponse:
+    """Every page gets the legal details and the price, because the footer and
+    the policy pages both need them and neither should reach for them itself."""
     return templates.TemplateResponse(
-        request=request, name=f"site/{name}", context={"rupees": RUPEES, **context}
+        request=request,
+        name=f"site/{name}",
+        context={
+            "rupees": RUPEES,
+            "d": legal.details(),
+            "blanks": legal.missing(),
+            "whatsapp_url": f"https://wa.me/{settings.whatsapp_display_number}"
+            if settings.whatsapp_display_number
+            else "",
+            **context,
+        },
     )
 
 
@@ -156,3 +168,59 @@ def done(request: Request) -> HTMLResponse:
         display_number=_pretty(number) or "93806 51594",
         whatsapp_url=f"https://wa.me/{number}" if number else "",
     )
+
+
+# --- the published policies -----------------------------------------------
+#
+# Served from this repository rather than the assistant's because this is the
+# service a customer and a payment aggregator actually visit. The text is
+# rendered from one set of settings (``shelf/legal.py``), so the entity name
+# and the grievance officer cannot say one thing on the terms page and
+# something else on the contact page.
+
+
+@router.get("/terms", response_class=HTMLResponse)
+def terms(request: Request) -> HTMLResponse:
+    return _page(request, "terms.html")
+
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request) -> HTMLResponse:
+    return _page(request, "privacy.html")
+
+
+@router.get("/refunds", response_class=HTMLResponse)
+def refunds(request: Request) -> HTMLResponse:
+    return _page(request, "refunds.html")
+
+
+@router.get("/cancel", response_class=HTMLResponse)
+def cancel(request: Request) -> HTMLResponse:
+    return _page(request, "cancel.html")
+
+
+@router.get("/contact", response_class=HTMLResponse)
+def contact(request: Request) -> HTMLResponse:
+    return _page(request, "contact.html")
+
+
+@router.get("/robots.txt", response_class=PlainTextResponse)
+def robots() -> str:
+    """Index the public pages; keep crawlers out of the signed-in ones.
+
+    Not a security control -- ``/files`` is behind a session either way. It
+    stops a crawler from spending requests on pages that answer it a sign-in
+    prompt, and keeps sign-up URLs carrying a code out of any index.
+    """
+    disallow = ("/files", "/f/", "/verify", "/checkout")
+    return "\n".join(["User-agent: *", *(f"Disallow: {path}" for path in disallow), ""])
+
+
+def not_found(request: Request, _: Exception) -> Response:
+    """A wrong URL on a branded site should not answer in raw JSON.
+
+    Keeps the 404 status: a page that looks like an error but answers 200 is
+    worse than the JSON, because every crawler and monitor believes it worked.
+    """
+    page = _page(request, "notfound.html")
+    return HTMLResponse(page.body, status_code=404)

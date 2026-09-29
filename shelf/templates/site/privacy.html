@@ -1,0 +1,265 @@
+{% extends "site/legal.html" %}
+{% set kicker = "Policy · DPDP Act 2023" %}
+{% block title %}Privacy policy{% endblock %}
+{% block heading %}Privacy policy{% endblock %}
+{% block document %}
+
+<section>
+  <h2>Who is responsible for your data</h2>
+  <p>{{ d.entity }} ({{ d.entity_type }}), registered at {{ d.address }}, is the
+    <strong>Data Fiduciary</strong> for the personal data described here. In the
+    language of the Digital Personal Data Protection Act, 2023, you are the
+    <strong>Data Principal</strong> — the person the data is about, and the
+    person whose decisions about it we have to honour.</p>
+  <p>SHELF is the website; the assistant is the WhatsApp contact you message.
+    They are one service run by one entity, and this policy covers both.</p>
+</section>
+
+<section>
+  <h2>What we collect, why, and how long we keep it</h2>
+  <p>Itemised, because a policy that says "we collect information to improve
+    our services" tells you nothing you could act on.</p>
+
+  <div class="wrapper">
+  <table class="datatable">
+    <thead><tr><th>What</th><th>Why we need it</th><th>How long</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Your mobile number</td>
+        <td>It is your account. It is how the assistant knows a message is
+          yours, and the only thing that ties a payment to a person.</td>
+        <td>While subscribed, then 90 days</td>
+      </tr>
+      <tr>
+        <td>Messages you send the assistant</td>
+        <td>Kept as written, so a correction and the thing it corrects can be
+          read together, and so "the one I sent last week" can be found.</td>
+        <td>While subscribed, then 90 days</td>
+      </tr>
+      <tr>
+        <td>Files you forward</td>
+        <td>The service is that we hold them and give them back.</td>
+        <td>While subscribed, then 90 days</td>
+      </tr>
+      <tr>
+        <td>Subjects, terms, deadlines, reminders</td>
+        <td>What you told us you are studying, so material can be filed under
+          it and a nudge can fire at the right time.</td>
+        <td>While subscribed, then 90 days</td>
+      </tr>
+      <tr>
+        <td>Sign-in records for this website</td>
+        <td>Which browsers you opened your files in, and when. Two at a time;
+          a third sign-in ends the least recently used.</td>
+        <td>Until you sign out, or 30 days idle</td>
+      </tr>
+      <tr>
+        <td>Sign-up verification codes</td>
+        <td>Proof that the number being paid for is a number you hold, before
+          any money is taken.</td>
+        <td>10 minutes, then deleted by a scheduled job</td>
+      </tr>
+      <tr>
+        <td>Payment records</td>
+        <td>Which subscription is yours and when it was last charged.</td>
+        <td>As long as tax and accounting law requires</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>What we deliberately do not have</h3>
+  <ul>
+    <li><strong>Your card, UPI ID or bank details.</strong> Those go to Razorpay
+      and never reach us. We could not show them to you if you asked.</li>
+    <li><strong>Your name, email, college, or address</strong>, unless you
+      happen to type one into a message. We never ask for any of them.</li>
+    <li><strong>Your location, contacts, or anything else on your phone.</strong>
+      WhatsApp does not give it to us and we do not ask for it.</li>
+    <li><strong>An advertising profile.</strong> We do not build one, we do not
+      sell your data, and we do not use what you send to market anything to you
+      or to anybody else.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What we do with it, and what we do not</h2>
+  <p>Everything above exists to run the service you paid for: filing what you
+    send, finding it again, and firing the reminders you asked for.</p>
+  <p>Your material is scoped to your number. Every query we run against it is
+    filtered by your account, so one subscriber's search cannot reach another's
+    files — that is enforced in the code and covered by tests, not left to
+    care.</p>
+  <p>We do not use your files or messages to train any model, and we do not
+    give them to anybody who would.</p>
+</section>
+
+<section>
+  <h2>Who else handles it</h2>
+  <p>Running this needs other companies. Each is listed with what it actually
+    sees, because "we may share data with service providers" is not a
+    disclosure.</p>
+
+  <div class="wrapper">
+  <table class="datatable">
+    <thead><tr><th>Who</th><th>What they see</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Meta (WhatsApp)</td>
+        <td>Every message between you and the assistant, because that is the
+          channel. Governed by WhatsApp's own terms and privacy policy, which
+          you already accepted to use WhatsApp.</td>
+        <td>Per Meta</td>
+      </tr>
+      <tr>
+        <td>Razorpay</td>
+        <td>Your number and your payment details. We see neither the card nor
+          the UPI ID — only that a payment succeeded and when the period ends.</td>
+        <td>India</td>
+      </tr>
+      <tr>
+        <td>[LLM PROVIDER — NOT YET CHOSEN]</td>
+        <td><strong>The text of your messages</strong>, to work out what you are
+          asking for. Not your files. This is the single most significant
+          disclosure on this page and it cannot be completed until the provider
+          is chosen — including whether your text leaves India.</td>
+        <td>[TO BE STATED]</td>
+      </tr>
+      <tr>
+        <td>Cloudflare R2</td>
+        <td>The files you forward, stored as opaque objects under a key that
+          identifies your account.</td>
+        <td>Per Cloudflare</td>
+      </tr>
+      <tr>
+        <td>Render</td>
+        <td>Hosts the application and the database. Configured in Singapore.</td>
+        <td>Singapore</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Data leaving India</h3>
+  <p>The database and the application run in <strong>Singapore</strong>, and
+    some of the companies above process data outside India. DPDP permits this
+    except to countries the Central Government restricts, and we will stop
+    using any provider that becomes restricted. If that matters to you, it is
+    better to know before you subscribe than after.</p>
+</section>
+
+<section>
+  <h2>Consent, and taking it back</h2>
+  <p>We process your data because you asked us to, by subscribing and by
+    sending the assistant things to keep. That consent covers the purposes in
+    section 2 and nothing else.</p>
+  <p>You can withdraw it at any time, and withdrawing it is the same action as
+    asking for erasure — see section 6. Withdrawing consent ends the service,
+    because there is no version of this product that works without holding what
+    you send it. That is a consequence, not a penalty, and we would rather say
+    it plainly here than surprise you later.</p>
+</section>
+
+<section>
+  <h2>Your rights</h2>
+  <p>DPDP gives you these. We answer all of them within
+    <strong>{{ d.rights_response_days }} days</strong>, and usually far sooner.</p>
+
+  <h3>A copy of everything</h3>
+  <p>Ask and we send every row we hold about you, keyed by table, as a file.
+    Not a summary and not a selection — the whole thing.</p>
+
+  <h3>Correction and completion</h3>
+  <p>If something we hold is wrong, tell us and we fix it. Most of it you can
+    correct yourself by telling the assistant.</p>
+
+  <h3>Erasure</h3>
+  <p>Ask and we delete your account, every message, every deadline, every
+    sign-in record, and every file — from the database and from file storage
+    both. Files go first, deliberately: rows deleted while the file survives
+    would leave your material sitting there with nothing pointing at it.</p>
+  <div class="callout">
+    <p><strong>Erasure is done by a person, never by messaging the assistant.</strong>
+      Everywhere else in this product a model proposes and a check decides,
+      which suits something that can be undone. A complete deletion cannot be
+      undone, so it is kept off any path a misread message could reach.</p>
+  </div>
+
+  <h3>Nominating someone</h3>
+  <p>You can nominate another person to exercise these rights on your behalf if
+    you die or become incapable of exercising them yourself. Write to the
+    Grievance Officer and we will record it.</p>
+
+  <h3>Grievance redressal</h3>
+  <p>{{ d.grievance_officer }} is the Grievance Officer. Write to
+    <strong>{{ d.grievance_email }}</strong> and you get an acknowledgement and
+    an answer within {{ d.rights_response_days }} days. If we do not resolve it,
+    you may complain to the <strong>Data Protection Board of India</strong>.
+    Going to us first is not a requirement we can impose on you, but it is
+    usually faster.</p>
+</section>
+
+<section>
+  <h2>Deletion when you stop paying</h2>
+  <p>If your subscription lapses we keep everything for <strong>90 days</strong>
+    and then delete it automatically — account, messages, deadlines and files.
+    The 90 days exist so a failed card or a late renewal costs you nothing.</p>
+  <p>After that it is gone, and we cannot restore it. Keep your own copies of
+    anything you would be upset to lose. This is a filing service, not a
+    backup.</p>
+</section>
+
+<section>
+  <h2>How it is protected</h2>
+  <ul>
+    <li>Everything travels over encrypted connections.</li>
+    <li><strong>Our logs record identifiers, never message content or phone
+      numbers.</strong> Reading our own logs does not show anyone what you sent.
+      Database errors are configured not to echo the values that caused them,
+      because one of those values is your message.</li>
+    <li>Operational alerts carry an account identifier and nothing else, so a
+      third-party alerting channel never receives your material.</li>
+    <li>Signing in to this website is a one-time link the assistant sends you
+      on WhatsApp. It works once, expires in minutes, and can be withdrawn —
+      we never send a code <em>to</em> your phone that someone could talk you
+      into forwarding.</li>
+    <li>Access to the production database is limited to the people operating
+      the service.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>If there is a breach</h2>
+  <p>DPDP requires us to notify you and the Data Protection Board if your data
+    is breached. We will, without waiting to establish blame, and we will tell
+    you what was affected and what to do about it.</p>
+  <div class="callout">
+    <p><strong>Being straight about this:</strong> the written internal
+      procedure for handling a breach is not finished. The obligation binds us
+      regardless, and this sentence is here so the gap is visible to us rather
+      than only to a regulator.</p>
+  </div>
+</section>
+
+<section>
+  <h2>People under 18</h2>
+  <p>This service is intended for people aged 18 and over, and by subscribing
+    you confirm you are.</p>
+  <div class="callout">
+    <p>DPDP treats anyone under 18 as a child and requires verifiable parental
+      consent before processing their data. A first-year college student in
+      India is routinely 17. <strong>We do not currently ask, and a statement
+      of intent is not the same as a control.</strong></p>
+    <p>If you are under 18, do not subscribe. If you have, tell us at
+      {{ d.grievance_email }} and we will refund you in full and delete
+      everything.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Changes</h2>
+  <p>If this policy changes in substance we will tell you on WhatsApp before it
+    takes effect, and the date at the top of this page will change. We will not
+    quietly widen what we do with your data and rely on you re-reading a page.</p>
+</section>
+{% endblock %}

@@ -226,12 +226,43 @@ table is the contract.
 | `WEB_SESSION_DAYS` | Idle timeout for a signed-in browser. Default 30. |
 | `WEB_DEVICES` | Signed-in browsers per student. Default 2. |
 | `WHATSAPP_CHAT_URL` | Where the dead-end pages send someone whose link expired. |
+| `LEGAL_*`, `SUPPORT_*`, `GRIEVANCE_*` | Printed verbatim on the policy pages. **The site refuses to start in production while any is blank** — see below. |
 | `R2_*` | Object storage. Empty falls back to an in-memory store — fine on a laptop, and silently destructive in production. |
 
 The session cookie is `Secure` only when `APP_ENV=prod`; over plain HTTP on a
 laptop a secure cookie is never set and nothing works.
 
 ---
+
+## The policy pages
+
+`/terms`, `/privacy`, `/refunds`, `/cancel` and `/contact` are published here,
+because this is the site a customer and a payment aggregator actually visit.
+The assistant's repository redirects its old copies here (301) so there is one
+authoritative text — two sets of live terms that can disagree is not a stale
+page, it is a question of which one binds.
+
+They render from one set of settings (`shelf/legal.py`), so the entity name and
+the grievance officer cannot say one thing on the terms page and another on the
+contact page. **`legal.check()` refuses to start a production process while any
+required detail is blank**, and reports all of them at once. In development it
+warns and carries on.
+
+That refusal is the point. A policy page reading `[GRIEVANCE OFFICER NAME]` is
+worse than no page: it renders, the site deploys, and the brackets sit there
+for months. Removing the refusal fails a test; so does reporting only the first
+blank, and so does rendering a blank as nothing rather than as a bracket.
+
+**These drafts are not legal advice and have not been reviewed by a lawyer.**
+Two things in them are unresolved and marked on the page itself rather than
+left to look finished:
+
+- **The LLM provider is not chosen**, so the privacy policy cannot yet say who
+  receives the text of a student's messages, or whether it leaves India. That
+  is the single most significant disclosure on the page.
+- **Nothing asks whether a subscriber is under 18.** DPDP treats them as
+  children needing verifiable parental consent, and an Indian first-year is
+  routinely 17. See `docs/dpdp.md` in the assistant's repository.
 
 ## Known gaps
 

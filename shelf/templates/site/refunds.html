@@ -1,0 +1,99 @@
+{% extends "site/legal.html" %}
+{% set kicker = "Policy" %}
+{% block title %}Cancellation and refunds{% endblock %}
+{% block heading %}Cancellation and refunds{% endblock %}
+{% block document %}
+
+<section>
+  <h2>The short version</h2>
+  <div class="callout">
+    <p>Cancel whenever you like — it stops the next charge and you keep what
+      you already paid for. New subscribers get a full refund within
+      <strong>{{ d.refund_window_days }} days</strong> of the first payment, no
+      reason needed. Anything we charged in error comes back in full, always.</p>
+  </div>
+  <p>The rest of this page is the same thing said precisely.</p>
+</section>
+
+<section>
+  <h2>Cancelling</h2>
+  <p>Send <strong>"cancel my subscription"</strong> to the assistant on
+    WhatsApp. It stops the recurring mandate immediately and confirms in the
+    chat. There is no form to find and no retention script to sit through.</p>
+  <p>Cancelling from the chat rather than from a web page is deliberate: your
+    subscription is tied to your phone, and a number typed into a form proves
+    nothing about who typed it. A message from the phone itself does.</p>
+  <p>If that fails for any reason, email {{ d.support_email }} with your number
+    and we will cancel it by hand the same working day. See the
+    <a href="/cancel">cancellation page</a>.</p>
+  <h3>What cancelling does and does not do</h3>
+  <ul>
+    <li>It stops all future charges.</li>
+    <li>You keep full access until the end of the period already paid for.</li>
+    <li><strong>Nothing you have stored is deleted because you cancelled.</strong>
+      It is kept for 90 days in case you come back, then deleted automatically.
+      Ask us and we will delete it sooner.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Refunds</h2>
+
+  <h3>First subscription, within {{ d.refund_window_days }} days</h3>
+  <p>Full refund of that payment, for any reason or none. Email
+    {{ d.support_email }} from or mentioning your registered number. We do not
+    ask why.</p>
+
+  <h3>After that</h3>
+  <p>Payments already taken are not refunded, because the month they cover has
+    been provided. You are never charged for a month you did not want:
+    cancelling stops the next charge, and a monthly plan means at most one
+    month is ever at stake.</p>
+
+  <h3>Always refunded in full, whenever it happened</h3>
+  <ul>
+    <li>Charged after you cancelled.</li>
+    <li>Charged more than once for the same month.</li>
+    <li>Charged on a number that was never activated, or where the service
+      never worked for you and we could not fix it.</li>
+    <li>Charged by someone who is not you, on a number you did not authorise.
+      Tell us and we will refund it and close the account.</li>
+    <li>You were under 18 when you subscribed. Full refund, everything deleted,
+      no argument.</li>
+    <li>We ended your account for a reason other than your breach of the
+      <a href="/terms">terms</a> — the unused part of the period comes back.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How to ask</h2>
+  <p>Email <strong>{{ d.support_email }}</strong> with the number the
+    subscription is on and, if you have it, the Razorpay payment reference from
+    your receipt. That is all we need — you do not have to explain yourself.</p>
+  <p>We acknowledge within <strong>48 hours</strong> and decide within
+    <strong>5 working days</strong>.</p>
+</section>
+
+<section>
+  <h2>How long a refund takes</h2>
+  <p>Approved refunds go back to the original payment method — we cannot send
+    one anywhere else, and we would not be able to even if you asked.</p>
+  <ul>
+    <li>We issue it within <strong>5 working days</strong> of approving it.</li>
+    <li>Razorpay and your bank then take their own time, typically
+      <strong>5 to 7 working days</strong>, sometimes up to one billing cycle
+      for a card.</li>
+  </ul>
+  <p>If it has not arrived within 10 working days of our confirmation, tell us
+    and we will chase Razorpay with the reference on your behalf.</p>
+</section>
+
+<section>
+  <h2>If you disagree with a decision</h2>
+  <p>Write to <strong>{{ d.grievance_officer }}</strong> at
+    {{ d.grievance_email }}, who will look at it independently of whoever
+    answered first. If you are still unhappy, you may take it to a Consumer
+    Commission. Raising a chargeback with your bank is your right and we will
+    not penalise you for it, but telling us first is almost always faster.</p>
+</section>
+{% endblock %}

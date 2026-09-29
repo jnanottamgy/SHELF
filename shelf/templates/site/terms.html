@@ -1,0 +1,169 @@
+{% extends "site/legal.html" %}
+{% set kicker = "Agreement" %}
+{% block title %}Terms of service{% endblock %}
+{% block heading %}Terms of service{% endblock %}
+{% block document %}
+
+<section>
+  <h2>Who these are between</h2>
+  <p>Between <strong>{{ d.entity }}</strong> ({{ d.entity_type }}), registered at
+    {{ d.address }} — "we" — and you, the person who subscribes. Subscribing
+    means you accept them.</p>
+  <p>"The assistant" is the WhatsApp contact. "SHELF" is this website. "Your
+    material" is everything you send the assistant: files, notes, links,
+    deadlines and messages.</p>
+</section>
+
+<section>
+  <h2>Eligibility</h2>
+  <p>You must be <strong>18 or over</strong> and able to enter a contract under
+    Indian law. You must subscribe on a mobile number you hold and control,
+    which is why we verify it before taking payment.</p>
+</section>
+
+<section>
+  <h2>What the service is — and what it is not</h2>
+  <p>It stores what you send and returns it when you ask. It is an
+    organisational tool.</p>
+  <ul>
+    <li>It <strong>does not</strong> provide academic content, tuition, answers,
+      or anything to submit as your own work.</li>
+    <li>It is <strong>not affiliated with, endorsed by, or connected to</strong>
+      any college, university or examination board.</li>
+    <li>It <strong>is not a backup service.</strong> See section 7.</li>
+  </ul>
+  <p>The assistant uses an automated model to work out what a message is asking
+    for. It can misread you. Every action it takes is echoed back so you can
+    see what it did, and it asks rather than guesses when it is unsure — but it
+    will still occasionally be wrong, and you should read what it says.</p>
+</section>
+
+<section>
+  <h2>Your account is your phone</h2>
+  <p>Your subscription is tied to one WhatsApp number, and that is the only
+    identity in this service. There is no password to forget and none to steal.</p>
+  <div class="callout">
+    <p><strong>The consequence is worth being blunt about: anyone holding your
+      unlocked phone can reach everything you have stored.</strong> Treat the
+      number as you treat the phone. Tell us at once if you lose it and we will
+      end every signed-in browser and suspend the account.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What you may send</h2>
+  <p>You keep ownership of your material. You give us a limited permission to
+    store it, process it, and give it back to you — for operating the service
+    and nothing else. That permission ends when the material is deleted.</p>
+  <p>You must have the right to send what you send. You must not use the
+    service for:</p>
+  <ul>
+    <li>material you do not hold the rights to copy or store;</li>
+    <li>anything unlawful under Indian law, or material that infringes
+      another person's rights;</li>
+    <li>examination malpractice, or anything your institution's rules forbid —
+      that is between you and them, and we take no part in it;</li>
+    <li>another person's personal data, sent without their knowledge.</li>
+  </ul>
+  <p>We do not read your material to police this, and we have no wish to. If we
+    are legally required to remove something we will, and we will tell you
+    unless the law forbids us from doing so.</p>
+</section>
+
+<section>
+  <h2>What you pay</h2>
+  <p><strong>₹{{ rupees }} per month</strong>{% if d.is_gst_registered %}{% if d.price_includes_gst %},
+    inclusive of GST{% else %}, plus GST at the applicable rate{% endif %}{% endif %}.
+    Collected by Razorpay as a recurring mandate and charged automatically each
+    month until you cancel.</p>
+  <ul>
+    <li>Access starts when the payment clears, not when the form is submitted.</li>
+    <li>We never see or store your card, UPI ID or bank details.</li>
+    <li>If we change the price, we will tell you at least <strong>30 days</strong>
+      beforehand, and you can cancel before it takes effect. A price change
+      never applies to a period you have already paid for.</li>
+  </ul>
+  <p>Cancellation and refunds are on the
+    <a href="/refunds">cancellation and refunds page</a>, and those terms form
+    part of these.</p>
+</section>
+
+<section>
+  <h2>Availability, and keeping your own copies</h2>
+  <p>We aim to keep the service running and we do not promise it always will
+    be. It depends on WhatsApp, which Meta operates and we do not control; on
+    Razorpay; and on hosting and storage providers. An outage at any of them is
+    an outage here.</p>
+  <div class="callout">
+    <p><strong>Keep your own copy of anything you would be upset to lose.</strong>
+      This is a convenience for finding things, not a place to keep the only
+      copy of your work. We say this here, on the pricing page, and again in
+      the privacy policy, because it is the single most important sentence on
+      any of them.</p>
+  </div>
+  <p>We may change or withdraw features. If we withdraw something you are
+    relying on, we will tell you before we do.</p>
+</section>
+
+<section>
+  <h2>Ending it</h2>
+  <p>You can cancel at any time. Cancelling stops the next charge; you keep
+    access until the end of the period you already paid for, and nothing you
+    have stored is deleted because you cancelled.</p>
+  <p>We may suspend or end an account that breaks section 5, that attacks or
+    abuses the service, or where we are legally required to. If we end your
+    account for anything other than your breach of these terms, we refund the
+    unused part of the period you paid for.</p>
+  <p>After a subscription ends, your material is kept for 90 days and then
+    deleted — see the <a href="/privacy">privacy policy</a>.</p>
+</section>
+
+<section>
+  <h2>What we are responsible for</h2>
+  <p>We are responsible for running the service with reasonable care, and for
+    our obligations under Indian law — including consumer law and the DPDP Act,
+    which this section does not and cannot limit.</p>
+  <p>Beyond that, and to the extent Indian law permits: our total liability for
+    any claim is limited to <strong>the amount you paid us in the three months
+    before it arose</strong>. We are not liable for lost material, missed
+    deadlines, academic or professional consequences, or losses that were not a
+    foreseeable result of our failing to do what we said we would.</p>
+  <p>Nothing here excludes liability for fraud, or for anything that cannot
+    lawfully be excluded.</p>
+</section>
+
+<section>
+  <h2>Things outside anyone's control</h2>
+  <p>Neither of us is in breach for a delay or failure caused by something
+    genuinely outside our control — network or platform outages, a change to
+    WhatsApp's rules or pricing, a government direction, or a natural event.</p>
+</section>
+
+<section>
+  <h2>Changes to these terms</h2>
+  <p>We may change these terms. If a change matters to you, we will tell you on
+    WhatsApp at least <strong>30 days</strong> beforehand and the date at the
+    top of this page will change. Continuing to use the service after that
+    means you accept them; if you would rather not, cancel before it takes
+    effect and we will refund the unused part of the period.</p>
+</section>
+
+<section>
+  <h2>Complaints</h2>
+  <p>Write to <strong>{{ d.grievance_officer }}</strong> at
+    {{ d.grievance_email }}. You get an acknowledgement within 48 hours and an
+    answer within {{ d.rights_response_days }} days. This is the grievance
+    channel required of us both by the Consumer Protection (E-Commerce) Rules,
+    2020 and by the DPDP Act.</p>
+  <p>Nothing here stops you from going to a Consumer Commission, or to the Data
+    Protection Board of India for a data matter.</p>
+</section>
+
+<section>
+  <h2>Law and jurisdiction</h2>
+  <p>Governed by the laws of India. Subject to your rights as a consumer to
+    bring proceedings where you live, the courts at
+    <strong>{{ d.jurisdiction }}</strong> have jurisdiction.</p>
+  <p>If any part of these terms is unenforceable, the rest stands.</p>
+</section>
+{% endblock %}
