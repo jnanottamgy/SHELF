@@ -1,0 +1,30 @@
+{% extends "shell.html" %}
+{% import "_icons.html" as icon %}
+{% block title %}{{ heading }}{% endblock %}
+{% block body %}
+<nav class="crumbs">
+  <a href="/files">All files</a>
+  {% if term %}<span class="sep">/</span><a href="/files/t/{{ term.id }}">Semester {{ term.sequence_no }}</a>{% endif %}
+  {% if subject %}<span class="sep">/</span><a href="/files/s/{{ subject.id }}">{{ subject.name }}</a>{% endif %}
+  <span class="sep">/</span><b>{{ heading }}</b>
+</nav>
+<h1>{{ heading }}</h1>
+{% if blurb %}<p class="sub">{{ blurb }}</p>{% endif %}
+
+{% if files %}
+<ul class="files">
+  {% for resource in files %}
+  <li><a href="/files/r/{{ resource.id }}">
+    <span class="chip {{ shelf_key if shelf_key and shelf_key != 'material' else '' }}">{{ icon.kind(resource) }}</span>
+    <span class="fname">
+      <span class="t">{{ resource|label }}</span>
+      <span class="d">{% if resource.title and resource.filename %}{{ resource.filename }} · {% endif %}{{ resource.created_at.strftime('%d %b %Y') }}</span>
+    </span>
+    {{ icon.chevron() }}
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty"><p>{{ empty }}</p></div>
+{% endif %}
+{% endblock %}

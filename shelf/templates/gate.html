@@ -1,0 +1,16 @@
+{% extends "shell.html" %}
+{% set signed_in = false %}
+{% block title %}{{ headline }}{% endblock %}
+{% block body %}
+{# A dead end, so it carries the whole identity rather than a bare sentence:
+   this is the page a student lands on when something went wrong, and it has
+   to look like the product they paid for. #}
+<div class="gate">
+  <span class="mark">Academic <i>Assistant</i></span>
+  <h1>{{ headline }}</h1>
+  <p class="sub">{{ message }}</p>
+  {% if hint %}<p class="sub hint">{{ hint }}</p>{% endif %}
+  {% if back %}<a class="cta" href="/files">Back to your files</a>
+  {% elif whatsapp_url %}<a class="cta" href="{{ whatsapp_url }}">Open WhatsApp</a>{% endif %}
+</div>
+{% endblock %}

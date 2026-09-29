@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    # A real Postgres, built from the committed schema snapshot rather than
+    # from the models under test. Deriving it from shelf/models/ would test
+    # the mirror against itself and make drift invisible, which is the one
+    # failure mode this repository actually has.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: academic_assistant
+          POSTGRES_PASSWORD: dev_password
+          POSTGRES_DB: academic_assistant
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+psycopg://academic_assistant:dev_password@localhost:5432/academic_assistant
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+
+      - name: Load the assistant's schema
+        run: psql "postgresql://academic_assistant:dev_password@localhost:5432/academic_assistant" -v ON_ERROR_STOP=1 -f schema/academic-assistant.sql
+
+      - run: uv run ruff check .
+      - run: uv run mypy .
+      - run: uv run pytest
+
+      # Dependency CVEs. Runs only here, not in the local loop.
+      - run: uvx pip-audit --strict
+        continue-on-error: false

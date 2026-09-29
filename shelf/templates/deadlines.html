@@ -1,0 +1,27 @@
+{% extends "shell.html" %}
+{% block title %}Deadlines{% endblock %}
+{% block body %}
+<nav class="crumbs"><a href="/files">All files</a><span class="sep">/</span><b>Deadlines</b></nav>
+<h1>What's still due.</h1>
+<p class="sub">Soonest first. Anything that has passed is gone from here — a
+  deadline you can no longer meet is not information.</p>
+
+{% if deadlines %}
+<ul class="files">
+  {% for item in deadlines %}
+  <li><div class="due">
+    <span class="fname">
+      <span class="t">{{ item.title }}</span>
+      <span class="d">{% if item.subject %}{{ item.subject }} · {% endif %}{{ item.due.strftime('%a %d %b, %-I:%M %p') }} IST</span>
+    </span>
+    <span class="when {{ 'soon' if item.days <= 2 else '' }}">
+      {% if item.days == 0 %}today{% elif item.days == 1 %}tomorrow{% else %}in {{ item.days }} days{% endif %}
+    </span>
+  </div></li>
+  {% endfor %}
+</ul>
+{% else %}
+<div class="empty"><p>Nothing due. Tell the assistant when something is and it
+  will both remember it and nudge you.</p></div>
+{% endif %}
+{% endblock %}

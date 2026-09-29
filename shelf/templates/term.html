@@ -1,0 +1,32 @@
+{% extends "shell.html" %}
+{% import "_icons.html" as icon %}
+{% block title %}Semester {{ term.sequence_no }}{% endblock %}
+{% block body %}
+<nav class="crumbs">
+  <a href="/files">All files</a><span class="sep">/</span><b>Semester {{ term.sequence_no }}</b>
+</nav>
+<h1>Semester {{ term.sequence_no }}</h1>
+<p class="sub">{{ subjects|length }} subject{{ '' if subjects|length == 1 else 's' }}{% if term.is_active %}, and this is the one you're in{% endif %}.</p>
+
+{% if subjects %}
+<div class="grid">
+  {% for folder in subjects %}
+  <a class="folder" href="/files/s/{{ folder.subject.id }}">
+    {{ icon.folder() }}
+    <span class="name">{{ folder.subject.name }}</span>
+    <span class="meta">{{ folder.count }} file{{ '' if folder.count == 1 else 's' }}</span>
+  </a>
+  {% endfor %}
+  {# The sketch's per-term drawer. A cross-section of the Info & Admin
+     shelves, not a folder anything was moved into. #}
+  <a class="folder tint-info" href="/files/t/{{ term.id }}/admin">
+    {{ icon.notice() }}
+    <span class="name">Admin &amp; Sem Info</span>
+    <span class="meta">across all subjects</span>
+    <span class="blurb">Syllabus, timetables, circulars — gathered from every subject this semester.</span>
+  </a>
+</div>
+{% else %}
+<div class="empty"><p>No subjects recorded for this term.</p></div>
+{% endif %}
+{% endblock %}

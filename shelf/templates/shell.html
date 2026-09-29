@@ -1,0 +1,214 @@
+{# The one layout. Every page is this plus a block, so the header, the search
+   box and the footer cannot drift apart between views. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="same-origin">
+<meta name="theme-color" content="#0d5c55" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1211" media="(prefers-color-scheme: dark)">
+<title>{% block title %}Your files{% endblock %} · Academic Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{# One display face, one weight, swap-on-load. Body text stays on the system
+   stack on purpose: this is read on mid-range Android over mobile data, and a
+   webfont for the interface itself would be paid for on every cold load by
+   exactly the students this is for. #}
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+  :root{
+    color-scheme: light;
+    --paper:#f6f5f1; --card:#fff; --raised:#fffdf9;
+    --ink:#14181a; --ink-2:#4b5357; --muted:#7d868b;
+    --line:#e4e2dc; --line-2:#efedE7;
+    --accent:#0d5c55; --accent-soft:#e3efec; --accent-ink:#0b4b45;
+    --material:#0d5c55; --material-soft:#e3efec;
+    --pyq:#8a4b1f;      --pyq-soft:#f6ebe1;
+    --info:#3a4a80;     --info-soft:#e7eaf6;
+    --warn:#8a5a10;
+    --shadow:0 1px 2px rgba(20,24,26,.05), 0 6px 18px -12px rgba(20,24,26,.22);
+    --radius:14px;
+    --gutter:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --paper:#0e1211; --card:#171b1b; --raised:#1c2120;
+      --ink:#eceeed; --ink-2:#b9c0c1; --muted:#868f90;
+      --line:#272d2d; --line-2:#202625;
+      --accent:#57c3b2; --accent-soft:#16302c; --accent-ink:#8fdccf;
+      --material:#57c3b2; --material-soft:#16302c;
+      --pyq:#d79b62;      --pyq-soft:#33261a;
+      --info:#8fa2e6;     --info-soft:#1d2338;
+      --warn:#d8a441;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 22px -14px rgba(0,0,0,.7);
+    }
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  a{color:inherit}
+  .wrap{max-width:900px;margin:0 auto;padding:0 var(--gutter)}
+
+  /* ---- header ---------------------------------------------------------- */
+  header.bar{
+    position:sticky; top:0; z-index:20;
+    padding-top:env(safe-area-inset-top,0px);
+    background:color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar .row{display:flex;align-items:center;gap:12px;padding:11px 0}
+  .mark{
+    font-family:"Instrument Serif",Georgia,"Times New Roman",serif;
+    font-size:23px; letter-spacing:.005em; text-decoration:none; color:var(--ink);
+    white-space:nowrap; line-height:1;
+  }
+  .mark i{font-style:italic;color:var(--accent)}
+  .spacer{flex:1}
+  .tally{display:flex;gap:14px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .tally b{color:var(--ink-2);font-weight:600;font-variant-numeric:tabular-nums}
+  form.find{display:flex;gap:8px;padding:0 0 11px}
+  form.find input{
+    flex:1;min-width:0;padding:10px 13px;font-size:16px;color:var(--ink);
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+  }
+  form.find input::placeholder{color:var(--muted)}
+  form.find input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  form.find button{
+    padding:10px 15px;font-size:14.5px;font-weight:600;color:var(--card);
+    background:var(--accent);border:0;border-radius:10px;cursor:pointer;
+  }
+  @media (max-width:560px){ .tally{display:none} }
+
+  /* ---- breadcrumb ------------------------------------------------------ */
+  nav.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+             font-size:13.5px;color:var(--muted);margin:20px 0 6px}
+  nav.crumbs a{color:var(--muted);text-decoration:none}
+  nav.crumbs a:hover{color:var(--accent);text-decoration:underline}
+  nav.crumbs span.sep{opacity:.5}
+  nav.crumbs b{color:var(--ink-2);font-weight:600}
+
+  h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;
+     font-size:clamp(30px,7vw,42px);line-height:1.08;letter-spacing:-.01em;
+     margin:2px 0 6px;text-wrap:balance}
+  .sub{color:var(--ink-2);margin:0 0 22px;font-size:15px;max-width:60ch}
+  h2{font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+     color:var(--muted);margin:30px 0 11px}
+
+  /* ---- folder grid ----------------------------------------------------- */
+  /* align-items:start so a card is as tall as its own content: stretching
+     a short one to match a long one leaves a pane of empty card. */
+  .grid{display:grid;gap:12px;align-items:start;
+        grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+  .folder{
+    display:flex;flex-direction:column;gap:2px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 16px 14px;text-decoration:none;color:inherit;box-shadow:var(--shadow);
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .folder:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .folder .ico{width:26px;height:26px;margin-bottom:9px;color:var(--accent)}
+  .folder .name{font-weight:650;font-size:16.5px;letter-spacing:-.01em}
+  .folder .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .folder .blurb{font-size:13px;color:var(--ink-2);margin-top:5px;line-height:1.45}
+  .folder.tint-material .ico{color:var(--material)}
+  .folder.tint-pyq .ico{color:var(--pyq)}
+  .folder.tint-pyq:hover{border-color:var(--pyq)}
+  .folder.tint-info .ico{color:var(--info)}
+  .folder.tint-info:hover{border-color:var(--info)}
+  .folder.quiet .name{color:var(--ink-2)}
+
+  /* ---- file list ------------------------------------------------------- */
+  ul.files{list-style:none;margin:0;padding:0;
+           border:1px solid var(--line);border-radius:var(--radius);
+           background:var(--card);overflow:hidden;box-shadow:var(--shadow)}
+  ul.files li + li{border-top:1px solid var(--line-2)}
+  ul.files a{display:flex;align-items:center;gap:13px;padding:13px 15px;text-decoration:none}
+  ul.files a:hover{background:var(--raised)}
+  .chip{flex:none;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+        font-size:10px;font-weight:700;letter-spacing:.04em;
+        background:var(--accent-soft);color:var(--accent-ink)}
+  .chip.pyq{background:var(--pyq-soft);color:var(--pyq)}
+  .chip.info{background:var(--info-soft);color:var(--info)}
+  .fname{min-width:0;flex:1}
+  .fname .t{display:block;font-weight:600;font-size:15.5px;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fname .d{display:block;font-size:12.5px;color:var(--muted);
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .go{flex:none;color:var(--muted);width:18px;height:18px}
+
+  /* ---- misc ------------------------------------------------------------ */
+  .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:30px 22px;
+         text-align:center;color:var(--ink-2);background:transparent}
+  .empty p{margin:0 auto;max-width:44ch;font-size:14.5px}
+  .note{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+        padding:20px;box-shadow:var(--shadow);white-space:pre-wrap;line-height:1.65;
+        overflow-wrap:anywhere}
+  .due{display:flex;align-items:baseline;gap:10px;padding:14px 15px}
+  .due .when{flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .due .soon{color:var(--warn);font-weight:600}
+  .gate ~ footer, body:has(.gate) footer{justify-content:center}
+  footer{margin:44px 0 34px;padding-top:18px;border-top:1px solid var(--line);
+         display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+         font-size:13px;color:var(--muted)}
+  footer a{color:var(--muted)}
+  footer form{margin:0}
+  footer button{background:none;border:0;padding:0;font:inherit;color:var(--muted);
+                cursor:pointer;text-decoration:underline}
+  /* The signed-out pages. Centred and given air, because they are the whole
+     page rather than a message inside one. */
+  .gate{max-width:34rem;margin:0 auto;padding:12vh 0 0;text-align:center}
+  .gate .mark{display:inline-block;font-size:17px;color:var(--muted);margin-bottom:18px}
+  .gate .sub{margin-left:auto;margin-right:auto}
+  .gate .hint{color:var(--muted);font-size:14.5px}
+  .cta{display:inline-block;margin-top:14px;padding:11px 17px;border-radius:10px;
+       background:var(--accent);color:var(--card);font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+{% if signed_in is not defined or signed_in %}
+<header class="bar">
+  <div class="wrap">
+    <div class="row">
+      <a class="mark" href="/files">Academic <i>Assistant</i></a>
+      <span class="spacer"></span>
+      <div class="tally">
+        <span><b>{{ file_count }}</b> saved</span>
+        <span><a href="/files/deadlines" style="text-decoration:none"><b>{{ due_count }}</b> due</a></span>
+      </div>
+    </div>
+    <form class="find" method="get" action="/files/search" role="search">
+      <input type="search" name="q" value="{{ query }}" autocomplete="off"
+             placeholder="Search everything you've saved" aria-label="Search your files">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+
+<main class="wrap">
+  {% block body %}{% endblock %}
+
+  <footer>
+    {% if signed_in is not defined or signed_in %}
+    <a href="/files">All files</a>
+    <a href="/files/deadlines">Deadlines</a>
+    {% endif %}
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    {% if signed_in is not defined or signed_in %}
+    <form method="post" action="/files/signout"><button type="submit">Sign out</button></form>
+    {% endif %}
+  </footer>
+</main>
+</body>
+</html>

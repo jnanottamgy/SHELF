@@ -1,0 +1,8 @@
+{% extends "shell.html" %}
+{% block title %}{{ note.title or 'Note' }}{% endblock %}
+{% block body %}
+<nav class="crumbs"><a href="/files">All files</a><span class="sep">/</span><b>Note</b></nav>
+<h1>{{ note.title or 'Note' }}</h1>
+<p class="sub">Saved {{ note.created_at.strftime('%d %B %Y') }} — your own words, unchanged.</p>
+<div class="note">{{ note.body or '' }}</div>
+{% endblock %}

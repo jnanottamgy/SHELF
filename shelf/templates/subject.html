@@ -1,0 +1,26 @@
+{% extends "shell.html" %}
+{% import "_icons.html" as icon %}
+{% block title %}{{ subject.name }}{% endblock %}
+{% block body %}
+<nav class="crumbs">
+  <a href="/files">All files</a><span class="sep">/</span>
+  {% if term %}<a href="/files/t/{{ term.id }}">Semester {{ term.sequence_no }}</a><span class="sep">/</span>{% endif %}
+  <b>{{ subject.name }}</b>
+</nav>
+<h1>{{ subject.name }}</h1>
+<p class="sub">Three shelves, the same three in every subject — so where a thing
+  lives never depends on what's already there.</p>
+
+<div class="grid">
+  {% for shelf in shelves %}
+  <a class="folder tint-{{ shelf.key }}" href="/files/s/{{ subject.id }}/{{ shelf.key }}">
+    {% if shelf.key == 'material' %}{{ icon.stack() }}
+    {% elif shelf.key == 'pyq' %}{{ icon.papers() }}
+    {% else %}{{ icon.notice() }}{% endif %}
+    <span class="name">{{ shelf.label }}</span>
+    <span class="meta">{{ shelf.count }} file{{ '' if shelf.count == 1 else 's' }}</span>
+    <span class="blurb">{{ shelf.blurb }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

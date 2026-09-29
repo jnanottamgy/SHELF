@@ -1,0 +1,51 @@
+{% extends "shell.html" %}
+{% import "_icons.html" as icon %}
+{% block title %}Your files{% endblock %}
+{% block body %}
+<nav class="crumbs"><b>All files</b></nav>
+<h1>Everything you've saved.</h1>
+<p class="sub">Your terms, then your subjects, then what kind of thing it is.
+  Filed from what you told the assistant — nothing here needs sorting.</p>
+
+<h2>Terms</h2>
+{% if terms %}
+<div class="grid">
+  {% for folder in terms %}
+  <a class="folder" href="/files/t/{{ folder.term.id }}">
+    {{ icon.book() }}
+    <span class="name">Semester {{ folder.term.sequence_no }}{% if folder.term.is_active %} · current{% endif %}</span>
+    <span class="meta">{{ folder.count }} file{{ '' if folder.count == 1 else 's' }}</span>
+  </a>
+  {% endfor %}
+  {% if unfiled %}
+  <a class="folder quiet tint-info" href="/files/misc">
+    {{ icon.drawer() }}
+    <span class="name">Miscellaneous</span>
+    <span class="meta">{{ unfiled|length }} never filed</span>
+    <span class="blurb">Sent without a subject. Tell the assistant what they are and they move.</span>
+  </a>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty">
+  <p>No term yet. Message the assistant and tell it which semester you're in
+     and what you're studying — everything hangs off that.</p>
+</div>
+{% endif %}
+
+{% if recent %}
+<h2>Recently saved</h2>
+<ul class="files">
+  {% for resource in recent %}
+  <li><a href="/files/r/{{ resource.id }}">
+    <span class="chip {{ 'info' if not resource.storage_ref else '' }}">{{ icon.kind(resource) }}</span>
+    <span class="fname">
+      <span class="t">{{ resource|label }}</span>
+      <span class="d">{% if resource.title and resource.filename %}{{ resource.filename }} · {% endif %}{{ resource.created_at.strftime('%d %b %Y') }}{% if not resource.subject_id %} · not filed{% endif %}</span>
+    </span>
+    {{ icon.chevron() }}
+  </a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

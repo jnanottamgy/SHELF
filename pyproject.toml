@@ -1,0 +1,49 @@
+[project]
+name = "shelf"
+version = "0.1.0"
+description = "SHELF - Scoped Hosted Explorer for Linked Files"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "pydantic-settings>=2.6",
+    "jinja2>=3.1",
+    "boto3>=1.35",
+]
+
+# Deliberately absent: httpx-to-Meta, any LLM client, any payment SDK. This
+# service sends no messages and takes no money, so it carries none of those
+# credentials -- a process that cannot reach Meta cannot leak a Meta token.
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "httpx>=0.27",
+    "pre-commit>=4.0",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+packages = ["shelf"]
+# No sqlalchemy.ext.mypy plugin: it is gone in SQLAlchemy 2.1, and Mapped[]
+# annotations are understood natively. The assistant repo still loads it
+# because it pins an older SQLAlchemy -- do not copy that line back in here.
+
+# boto3 ships no type information. Narrowed to the two modules rather than
+# relaxing strict mode, so a genuinely untyped import elsewhere still fails.
+[[tool.mypy.overrides]]
+module = ["boto3.*", "botocore.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

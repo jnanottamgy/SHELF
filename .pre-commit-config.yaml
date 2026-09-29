@@ -1,0 +1,31 @@
+# Local hooks running this project's own tools through uv, rather than the
+# ruff/mypy mirror repos -- those pin their own versions and drift out of step
+# with uv.lock, so the hook passes where CI fails, or blocks a commit CI would
+# have accepted.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: uv run ruff check --force-exclude
+        language: system
+        types: [python]
+      - id: mypy
+        name: mypy
+        entry: uv run mypy .
+        language: system
+        types: [python]
+        # mypy is configured with packages = ["shelf"] and is only correct
+        # when it sees the whole package, not the files pre-commit staged.
+        pass_filenames: false
