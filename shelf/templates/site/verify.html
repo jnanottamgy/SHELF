@@ -25,6 +25,9 @@
         have to press send.</p>
     </div>
 
+    {# polite, not assertive: this updates once and should not interrupt
+       whatever the reader is already on. #}
+    <div class="status-region" role="status" aria-live="polite">
     <div class="waiting" id="waiting">
       <span class="pulse" aria-hidden="true"></span>
       <span id="waiting-text">Waiting for your message…</span>
@@ -38,6 +41,7 @@
         </svg>
       </span>
       <span>Number verified. Taking you to payment…</span>
+    </div>
     </div>
 
     <div class="error" id="expired" hidden style="margin-top:26px">

@@ -214,7 +214,8 @@ CREATE TABLE public.tickets (
     status public.ticket_status NOT NULL,
     attachment_ref bigint,
     ambiguous_solution text,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    payload jsonb
 );
 
 ALTER TABLE public.tickets ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (

@@ -134,3 +134,59 @@ class TestThePagesThemselves:
         body = web.get("/robots.txt").text
         assert "Disallow: /files" in body
         assert "Disallow: /f/" in body  # sign-up links carry a one-time token
+
+
+class TestTheClaimThrottle:
+    """`/verify` is unauthenticated and writes a row holding a real phone number.
+
+    Nobody can be spammed through it — the assistant never messages a claimed
+    number, which is the whole direction of the handshake — but the writing is
+    unbounded without this.
+    """
+
+    def test_a_person_mistyping_their_number_is_not_blocked(
+        self, web: TestClient
+    ) -> None:
+        """The limit has to be useless to a script and invisible to a student."""
+        for attempt in range(4):
+            page = web.post("/verify", data={"phone": f"987654321{attempt}"}).text
+            assert "a lot of attempts" not in page
+
+    def test_a_script_is_stopped(self, web: TestClient) -> None:
+        blocked = False
+        for attempt in range(20):
+            if "a lot of attempts" in web.post(
+                "/verify", data={"phone": f"90000000{attempt:02d}"}
+            ).text:
+                blocked = True
+                break
+        assert blocked
+
+    def test_one_number_cannot_be_walked_from_many_addresses(self) -> None:
+        """The per-number key, which is the one that matters: an address can be
+        changed, the number being harvested cannot."""
+        from shelf.throttle import Throttle
+
+        limiter = Throttle(limit=3, window_seconds=600)
+        assert all(limiter.allow("no:9876543210") for _ in range(3))
+        assert not limiter.allow("no:9876543210")
+
+    def test_the_window_really_expires(self) -> None:
+        from shelf.throttle import Throttle
+
+        limiter = Throttle(limit=2, window_seconds=60)
+        assert limiter.allow("k", now=0.0)
+        assert limiter.allow("k", now=1.0)
+        assert not limiter.allow("k", now=2.0)
+        assert limiter.allow("k", now=120.0)  # past the window
+
+    def test_it_does_not_grow_a_key_per_address_forever(self) -> None:
+        """A quiet process should not accumulate an entry for every address it
+        has ever seen."""
+        from shelf.throttle import Throttle
+
+        limiter = Throttle(limit=2, window_seconds=10)
+        limiter.allow("one", now=0.0)
+        limiter.allow("two", now=0.0)
+        limiter.allow("one", now=100.0)  # 'one' re-enters, its old hit expires
+        assert len(limiter._hits["one"]) == 1

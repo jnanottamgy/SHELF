@@ -17,7 +17,7 @@ on a page.
 uv sync
 cp .env.example .env          # point DATABASE_URL at the assistant's database
 uv run uvicorn shelf.main:app --reload
-uv run pytest                 # 44 tests
+uv run pytest                 # 83 tests
 ```
 
 ---
@@ -263,6 +263,17 @@ left to look finished:
 - **Nothing asks whether a subscriber is under 18.** DPDP treats them as
   children needing verifiable parental consent, and an Indian first-year is
   routinely 17. See `docs/dpdp.md` in the assistant's repository.
+
+## Deploying
+
+`render.yaml` is this repository's own blueprint — one web service, scaled out
+freely, which the assistant cannot be. It **does not declare the database**:
+`shelf-db` belongs to the assistant's blueprint and is the only place
+migrations run, so `DATABASE_URL` is pasted in rather than linked. A second
+declaration of the same database is how you end up with two.
+
+Three values must match the assistant's or a student sees inconsistent
+behaviour: `GRACE_DAYS`, `WEB_LINK_MINUTES`, and the R2 bucket.
 
 ## Known gaps
 

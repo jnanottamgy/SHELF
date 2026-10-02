@@ -117,6 +117,23 @@ def issue_link(db: Session, user_id: int, now: datetime) -> str:
     return token
 
 
+@pytest.fixture(autouse=True)
+def _fresh_throttle() -> Iterator[None]:
+    """The claim throttle is process-global, like the debounce registries.
+
+    Without this the first few tests use up the window and every later one
+    posting a number gets the "too many attempts" page instead of the thing it
+    is testing — a failure that looks like the feature is broken and is really
+    the harness leaking state between tests.
+    """
+    from shelf import throttle
+
+    throttle.claims = throttle.Throttle(
+        limit=throttle.claims._limit, window_seconds=throttle.claims._window
+    )
+    yield
+
+
 @pytest.fixture
 def store() -> MemoryStore:
     return MemoryStore()

@@ -1,0 +1,118 @@
+# SHELF's own blueprint. Separate from the assistant's for the same reason the
+# repository is: the assistant is pinned to one instance by its in-memory
+# debounce timers, and nothing a browser talks to should inherit that. This
+# service holds no in-process state -- sessions are rows -- so it scales out
+# and restarts freely.
+#
+# It does NOT create the database. The assistant's blueprint owns `shelf-db`
+# and is the only place migrations run; two services racing
+# `alembic upgrade head` against one database is how a half-applied schema
+# happens. This service is given that database's connection string by hand.
+
+services:
+  - type: web
+    name: shelf-web
+    runtime: docker
+    region: singapore          # same region as the database it reads
+    plan: starter
+    dockerfilePath: ./Dockerfile
+
+    # Scales out freely, unlike the assistant. Raise this when traffic asks.
+    numInstances: 1
+
+    # Cheap by design: answers without touching Postgres, so a health check
+    # every few seconds costs nothing. /health/db proves the database and is
+    # for a human to call, not a monitor.
+    healthCheckPath: /health
+
+    # No preDeployCommand. This service never migrates -- see the note above.
+
+    envVars:
+      # The assistant's database, by connection string from its blueprint.
+      # Not `fromDatabase`: that database is declared in the other repository's
+      # blueprint, and a second declaration of the same database is how you end
+      # up with two.
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_ENV
+        value: prod
+      - key: LOG_FORMAT
+        value: json
+
+      # A page render holds its connection for milliseconds, so this is much
+      # smaller than the assistant's pool, where a turn holds one across an
+      # LLM call.
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "10"
+
+      # MUST match the assistant's GRACE_DAYS. If they disagree, a student in
+      # grace is answered in chat and locked out of their own files, which
+      # reads as broken.
+      - key: GRACE_DAYS
+        value: "3"
+      # MUST match the assistant's WEB_LINK_MINUTES: quoted to the student
+      # there, enforced here.
+      - key: WEB_LINK_MINUTES
+        value: "15"
+      - key: WEB_SESSION_DAYS
+        value: "30"
+      - key: WEB_DEVICES
+        value: "2"
+
+      # The dialable number, for the sign-up deep link and the dead ends.
+      - key: WHATSAPP_DISPLAY_NUMBER
+        sync: false
+      - key: WHATSAPP_CHAT_URL
+        sync: false
+
+      # --- legal identity -------------------------------------------------
+      # Printed verbatim on the published policy pages. shelf/legal.py REFUSES
+      # TO START while any is blank, so a deploy fails loudly here rather than
+      # publishing a policy that names nobody.
+      - key: LEGAL_ENTITY
+        sync: false
+      - key: LEGAL_ENTITY_TYPE
+        sync: false
+      - key: LEGAL_ADDRESS
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: SUPPORT_PHONE
+        sync: false
+      - key: GRIEVANCE_OFFICER
+        sync: false
+      - key: GRIEVANCE_EMAIL
+        sync: false
+      - key: JURISDICTION_CITY
+        sync: false
+      - key: POLICY_EFFECTIVE_DATE
+        sync: false
+      - key: GST_NUMBER
+        sync: false
+
+      # --- object storage --------------------------------------------------
+      # Same bucket the assistant writes. Empty falls back to an in-memory
+      # store, which on a web service means every download 404s.
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+
+      # --- payments ---------------------------------------------------------
+      # Checkout runs here; the users row is still written by the assistant's
+      # Razorpay webhook, which is what keeps this service unable to grant
+      # access. Empty keys run FakeRazorpay, and preflight refuses that in prod.
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_PLAN_ID
+        sync: false
+      - key: PRICE_PAISE
+        value: "8900"

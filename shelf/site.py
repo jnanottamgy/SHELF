@@ -34,7 +34,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from shelf import legal, signup
+from shelf import legal, signup, throttle
 from shelf.config import settings
 from shelf.db import DbSession
 
@@ -95,6 +95,21 @@ def verify(request: Request, db: DbSession, phone: str = Form(default="")) -> HT
                 "That number already has a subscription. Message the assistant "
                 "on WhatsApp and it will pick up where you left off."
             ),
+        )
+
+    # Two keys, both capped: the caller, and the number being claimed. The
+    # second is what stops one address walking a college's numbering block,
+    # and it is the one that matters -- each claim is a row holding somebody's
+    # real phone number.
+    caller = request.client.host if request.client else "unknown"
+    digits = "".join(c for c in phone if c.isdigit())[-10:]
+    if not throttle.claims.allow(f"ip:{caller}") or not throttle.claims.allow(f"no:{digits}"):
+        logger.info("throttled a signup claim")  # never the number, never the address
+        return _page(
+            request,
+            "landing.html",
+            phone=phone,
+            error="That's a lot of attempts. Give it a few minutes and try again.",
         )
 
     try:
