@@ -17,9 +17,11 @@ still leave no trace. That is what makes it safe to test a function whose
 entire job is committing -- and every write in this service is one.
 """
 
+import os
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import pytest
 from fastapi.testclient import TestClient
@@ -34,29 +36,50 @@ from shelf.storage import MemoryStore, get_store
 
 SCHEMA = Path(__file__).resolve().parent.parent / "schema" / "academic-assistant.sql"
 
+TEST_DB_NAME = "shelf_test"
+LOCAL_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+# The assistant's docker-compose server; where tests go when the dev URL is hosted.
+COMPOSE_TEST_DATABASE_URL = (
+    f"postgresql+psycopg://academic_assistant:dev_password@localhost:5432/{TEST_DB_NAME}"
+)
+
 PHONE = "919380651594"
 SIGNUP = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 def _swap_database_name(url: str, name: str) -> str:
-    head, _, _ = url.rpartition("/")
-    return f"{head}/{name}"
+    return urlunsplit(urlsplit(url)._replace(path=f"/{name}"))
+
+
+def _derive_test_database_url(env_url: str | None, dev_url: str) -> str:
+    """TEST_DATABASE_URL if set, else the dev server only when it is local, else docker-compose.
+
+    The harness drops and recreates its database, so following a hosted dev URL
+    (Neon, Render) would do that on a server we never meant to touch, ~50ms a query away.
+    """
+    if env_url:
+        return env_url
+    if urlsplit(dev_url).hostname in LOCAL_HOSTS:
+        return _swap_database_name(dev_url, TEST_DB_NAME)
+    return COMPOSE_TEST_DATABASE_URL
 
 
 @pytest.fixture(scope="session")
 def test_database_url() -> str:
-    """Same server and credentials, name swapped, so the real one is untouched."""
-    return _swap_database_name(settings.database_url, "shelf_test")
+    """A scratch database on a local server, so the real one is untouched."""
+    return _derive_test_database_url(os.environ.get("TEST_DATABASE_URL"), settings.database_url)
 
 
 @pytest.fixture(scope="session")
 def test_engine(test_database_url: str) -> Iterator[Engine]:
+    # The admin connection goes to the test server, never the dev one.
     admin = create_engine(
-        _swap_database_name(settings.database_url, "postgres"), isolation_level="AUTOCOMMIT"
+        _swap_database_name(test_database_url, "postgres"), isolation_level="AUTOCOMMIT"
     )
     with admin.connect() as connection:
-        connection.execute(text("DROP DATABASE IF EXISTS shelf_test"))
-        connection.execute(text("CREATE DATABASE shelf_test"))
+        name = urlsplit(test_database_url).path.lstrip("/")
+        connection.execute(text(f'DROP DATABASE IF EXISTS "{name}"'))
+        connection.execute(text(f'CREATE DATABASE "{name}"'))
     admin.dispose()
 
     engine = create_engine(test_database_url, hide_parameters=True)
