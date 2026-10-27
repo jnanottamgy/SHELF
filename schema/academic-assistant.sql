@@ -136,7 +136,8 @@ CREATE TABLE public.resources (
     created_at timestamp with time zone NOT NULL,
     body text,
     filename text,
-    category text
+    category text,
+    sha256 text
 );
 
 ALTER TABLE public.resources ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
@@ -235,6 +236,8 @@ CREATE TABLE public.users (
     created_at timestamp with time zone NOT NULL,
     paid_until timestamp with time zone NOT NULL,
     subscription_id text,
+    email text,
+    google_sub text,
     CONSTRAINT ck_users_ph_no_digits CHECK (((ph_no)::text ~ '^91[0-9]{10}$'::text))
 );
 
@@ -295,6 +298,12 @@ ALTER TABLE ONLY public.subject_aliases
     ADD CONSTRAINT uq_subject_aliases_subject_id_alias UNIQUE (subject_id, alias);
 
 ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_google_sub_key UNIQUE (google_sub);
+
+ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_ph_no_key UNIQUE (ph_no);
 
 ALTER TABLE ONLY public.users
@@ -306,6 +315,8 @@ ALTER TABLE ONLY public.web_sessions
 CREATE INDEX ix_messages_user_id_id ON public.messages USING btree (user_id, id);
 
 CREATE INDEX ix_reminders_status_fire_at ON public.reminders USING btree (status, fire_at);
+
+CREATE INDEX ix_resources_user_id_sha256 ON public.resources USING btree (user_id, sha256);
 
 CREATE INDEX ix_signup_codes_ph_no ON public.signup_codes USING btree (ph_no);
 

@@ -24,6 +24,11 @@ class User(Base):
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
     ph_no: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
     name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # The Google account the student signed up with, written by the payment webhook.
+    # Sign-in matches on google_sub, which never changes; email is for showing who is
+    # signed in. Both NULL on rows from before Google sign-in.
+    email: Mapped[str | None] = mapped_column(Text, nullable=True, unique=True)
+    google_sub: Mapped[str | None] = mapped_column(Text, nullable=True, unique=True)
     term_system: Mapped[str | None] = mapped_column(term_type, nullable=True)
     # Written by the payment site, never by the bot. NOT NULL: a row exists because someone paid.
     paid_until: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
