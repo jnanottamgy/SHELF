@@ -31,7 +31,7 @@ from sqlalchemy.orm import Session
 from shelf import sessions
 from shelf.config import settings
 from shelf.db import SessionLocal, get_db
-from shelf.google import FakeGoogle, get_google
+from shelf.google import FakeGoogle, GoogleIdentity, get_google
 from shelf.models import User
 from shelf.storage import MemoryStore, get_store
 
@@ -194,6 +194,21 @@ def web(db_session: Session, store: MemoryStore, google: FakeGoogle) -> Iterator
             yield client
     finally:
         app.dependency_overrides.clear()
+
+
+def sign_in_with_google(
+    web: TestClient, google: FakeGoogle, *, sub: str = "google-sub-1", email: str = "asha@gmail.com"
+) -> None:
+    """Put a signed-in Google visitor in the cookie, the way the real flow does.
+
+    Deliberately driven through the real routes rather than by writing the
+    cookie directly: a test that forges the session would keep passing if the
+    callback stopped setting it.
+    """
+    google.identity_to_return = GoogleIdentity(sub=sub, email=email, name="Asha Rao", picture="")
+    started = web.get("/auth/google")
+    state = str(started.headers["location"]).split("state=")[1].split("&")[0]
+    web.get(f"/auth/google/callback?code=ok&state={state}")
 
 
 def sign_in(web: TestClient, db: Session, user: User) -> str:

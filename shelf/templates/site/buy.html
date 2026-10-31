@@ -1,0 +1,78 @@
+{% extends "site/base.html" %}
+{% block title %}SHELF — your WhatsApp number{% endblock %}
+{% block body %}
+
+{#
+  Step two of signing up: which number the assistant should file for.
+  Deliberately plain — the visual pass comes later. What matters here is that
+  the number is proved before anybody is charged, and that a number already
+  owned by a different Google account routes to a human instead of a dead end.
+#}
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+
+      {% if taken %}
+        <p class="eyebrow">Already taken</p>
+        <h1>That number is on <em>another account</em></h1>
+        <p class="lead">
+          {{ pretty_phone }} already has SHELF, signed in with
+          <strong>{{ masked }}</strong>. Sign in with that account and
+          everything will be where you left it.
+        </p>
+        <a class="btn btn-primary btn-full" href="/auth/google" style="margin-top:14px">
+          Sign in with a different Google account
+        </a>
+        <p class="hint">
+          Lost access to that Google account or that number? Email
+          <strong>{{ d.support_email }}</strong> and a person will sort it out.
+          We reply within 24 hours.
+        </p>
+
+      {% else %}
+        <p class="eyebrow">Step 2 of 3</p>
+        <h1>Which number should we <em>file for</em>?</h1>
+        <p class="lead">This is the WhatsApp number the assistant will talk to, so
+          it has to be the phone WhatsApp is actually on. You prove it by sending
+          us a code — nothing is charged until that's done.</p>
+
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+        {% if remembered %}
+          {# Offered back from the signed cookie, never from the database:
+             somebody who has not paid leaves no row behind them. #}
+          <form class="start" method="post" action="/verify">
+            <input type="hidden" name="phone" value="{{ remembered }}">
+            <p class="lead" style="margin-bottom:10px">
+              Use <strong>+91 {{ pretty_remembered }}</strong>, the number you
+              verified before?
+            </p>
+            <button class="btn btn-primary btn-full" type="submit">
+              Yes, use this number
+            </button>
+          </form>
+          <p class="hint" style="margin-bottom:18px">
+            <a href="/buy?change=1">Use a different number instead</a>
+          </p>
+        {% endif %}
+
+        {% if not remembered or request.query_params.get('change') %}
+          <form class="start" method="post" action="/verify">
+            <label for="phone">Your WhatsApp number</label>
+            <div class="field">
+              <span class="cc">+91</span>
+              <input id="phone" name="phone" inputmode="numeric" autocomplete="tel-national"
+                     placeholder="98765 43210" maxlength="13" value="{{ phone or '' }}" required>
+            </div>
+            <button class="btn btn-primary btn-full" type="submit" style="margin-top:14px">
+              Verify this number
+            </button>
+          </form>
+        {% endif %}
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

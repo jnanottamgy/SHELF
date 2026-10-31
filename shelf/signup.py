@@ -97,6 +97,18 @@ def state_of(db: Session, code: str, now: datetime) -> str:
     return "verified" if row.verified_at is not None else "waiting"
 
 
+def phone_for(db: Session, code: str) -> str | None:
+    """The number a code was claimed against, normalised.
+
+    The code is the only thing that travels between the page and this check,
+    so the number has to come from the row rather than from the form -- a
+    second form field saying which number was verified would be a field the
+    caller controls.
+    """
+    row = db.get(SignupCode, code)
+    return None if row is None else row.ph_no
+
+
 def already_a_customer(db: Session, raw_phone: str) -> User | None:
     """So the page can say "you already have this" instead of charging twice."""
     try:

@@ -23,9 +23,10 @@ from sqlalchemy.orm import Session
 
 from shelf import categories, sessions
 from shelf.config import settings
+from shelf.google import FakeGoogle
 from shelf.models import Deadline, Resource, Subject, Term, User, WebSession
 from shelf.storage import MemoryStore
-from tests.conftest import issue_link, make_student, sign_in
+from tests.conftest import issue_link, make_student, sign_in, sign_in_with_google
 
 NOW = datetime.now(tz=UTC)
 
@@ -400,10 +401,10 @@ class TestThePublicSite:
         assert 'id="phone"' not in page
 
     def test_the_verify_page_carries_the_code_into_the_deep_link(
-        self, web: TestClient, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+        self, web: TestClient, monkeypatch: pytest.MonkeyPatch, google: FakeGoogle) -> None:
         """The student presses send, nothing more. A code they have to retype
         into WhatsApp is a code most of them will mistype."""
+        sign_in_with_google(web, google)
         monkeypatch.setattr(settings, "whatsapp_display_number", "919380651594")
         page = web.post("/verify", data={"phone": "9876543210"}).text
 
@@ -411,10 +412,10 @@ class TestThePublicSite:
         assert "98765 43210" in page  # their number, read back the way they say it
 
     def test_no_configured_number_still_renders_a_usable_page(
-        self, web: TestClient, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+        self, web: TestClient, monkeypatch: pytest.MonkeyPatch, google: FakeGoogle) -> None:
         """A dead deep link is worse than none: the fallback tells them what to
         send and to whom."""
+        sign_in_with_google(web, google)
         monkeypatch.setattr(settings, "whatsapp_display_number", "")
         page = web.post("/verify", data={"phone": "9876543210"}).text
 
@@ -442,8 +443,8 @@ class TestTheSignupHandshake:
     """
 
     def test_submitting_a_number_claims_a_code(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
 
         page = web.post("/verify", data={"phone": "98765 43210"}).text
@@ -454,8 +455,8 @@ class TestTheSignupHandshake:
         assert row.code in page
 
     def test_a_number_we_could_never_reach_is_refused_before_payment(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
         from shelf.phone import InvalidPhoneNumber, normalise
 
@@ -472,19 +473,19 @@ class TestTheSignupHandshake:
         assert db_session.scalar(select(SignupCode)) is None
 
     def test_an_existing_customer_is_not_charged_twice(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
         """"Nothing happened" is how a paying student decides it is broken."""
+        sign_in_with_google(web, google)
         make_student(db_session, "919876543210")
         page = web.post("/verify", data={"phone": "9876543210"}).text
 
         assert "already has a subscription" in page
 
     def test_the_state_endpoint_answers_by_code_not_by_number(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
         """Polling must reveal nothing the caller did not already hold. By
         number, this would be a way to ask whether a stranger is signing up."""
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
 
         web.post("/verify", data={"phone": "9876543210"})
@@ -495,8 +496,8 @@ class TestTheSignupHandshake:
         assert web.get("/verify/NOTACODE/state").json() == {"state": "expired"}
 
     def test_a_verified_code_reads_as_verified(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
 
         web.post("/verify", data={"phone": "9876543210"})
@@ -508,10 +509,10 @@ class TestTheSignupHandshake:
         assert web.get(f"/verify/{row.code}/state").json() == {"state": "verified"}
 
     def test_checkout_refuses_an_unverified_code(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
         """The gate. Nothing unverified reaches a payment provider, so
         everything the webhook later sees is verified by construction."""
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
 
         web.post("/verify", data={"phone": "9876543210"})
@@ -522,8 +523,8 @@ class TestTheSignupHandshake:
         assert "could not confirm" in web.get("/checkout").text
 
     def test_checkout_admits_a_verified_one(
-        self, web: TestClient, db_session: Session
-    ) -> None:
+        self, web: TestClient, db_session: Session, google: FakeGoogle) -> None:
+        sign_in_with_google(web, google)
         from shelf.models import SignupCode
 
         web.post("/verify", data={"phone": "9876543210"})

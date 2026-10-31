@@ -103,6 +103,14 @@ ALTER TABLE public.messages ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     CACHE 1
 );
 
+CREATE TABLE public.razorpay_events (
+    event_id text NOT NULL,
+    event text NOT NULL,
+    subscription_id text,
+    outcome text NOT NULL,
+    received_at timestamp with time zone NOT NULL
+);
+
 CREATE TABLE public.reminders (
     id bigint NOT NULL,
     user_id bigint NOT NULL,
@@ -272,6 +280,9 @@ ALTER TABLE ONLY public.messages
 
 ALTER TABLE ONLY public.messages
     ADD CONSTRAINT messages_wa_message_id_key UNIQUE (wa_message_id);
+
+ALTER TABLE ONLY public.razorpay_events
+    ADD CONSTRAINT razorpay_events_pkey PRIMARY KEY (event_id);
 
 ALTER TABLE ONLY public.reminders
     ADD CONSTRAINT reminders_pkey PRIMARY KEY (id);

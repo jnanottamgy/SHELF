@@ -15,6 +15,8 @@ from fastapi.testclient import TestClient
 
 from shelf import legal
 from shelf.config import Settings
+from shelf.google import FakeGoogle
+from tests.conftest import sign_in_with_google
 
 # Everything a live site needs, so each test can spoil exactly one thing.
 _FILLED = {
@@ -152,7 +154,11 @@ class TestTheClaimThrottle:
             page = web.post("/verify", data={"phone": f"987654321{attempt}"}).text
             assert "a lot of attempts" not in page
 
-    def test_a_script_is_stopped(self, web: TestClient) -> None:
+    def test_a_script_is_stopped(self, web: TestClient, google: FakeGoogle) -> None:
+        """Signed in, because /verify now requires it -- which is itself part
+        of the defence: a script has to hold a Google account to get this far,
+        and the throttle keys on that account as well as on the address."""
+        sign_in_with_google(web, google)
         blocked = False
         for attempt in range(20):
             if "a lot of attempts" in web.post(

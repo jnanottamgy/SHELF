@@ -17,7 +17,7 @@ on a page.
 uv sync
 cp .env.example .env          # point DATABASE_URL at the assistant's database
 uv run uvicorn shelf.main:app --reload
-uv run pytest                 # 123 tests
+uv run pytest                 # 138 tests
 ```
 
 ---
@@ -170,6 +170,48 @@ just replaced a phone, and "sign out on the old device" is not an instruction
 they can follow.
 
 ---
+
+## Buying
+
+Google first, then the number, then the payment — and the number is proved
+before anybody is charged. The assistant answers an unknown number with
+silence, so a payment taken against a mistyped one is invisible from every
+direction: no bounce, no error, nothing until the student gives up.
+
+`/buy` and `/verify` are **behind sign-in**, which is not ceremony. The number
+step answers "is this number already a customer", and leaving it open makes it
+a way to ask that about any number in India. Requiring an account does not make
+enumeration impossible; it makes it attributable and rate-limitable, and the
+throttle now keys on the Google account as well as the address and the number.
+
+Four things are re-checked at `/checkout`, none of them trusted from the page
+that sent them:
+
+1. somebody is signed in — the subscription belongs to an account, and that
+   account is named in the Razorpay notes;
+2. the code finished verifying;
+3. **this browser is the one that claimed it.** The polling endpoint is public
+   by design (keyed by the code), so a code can be watched by anyone who sees
+   it; spending it has to stay with the browser that started the claim;
+4. the number still does not belong to a different Google account — checked
+   again because minutes have passed and the answer can have changed.
+
+A number owned by **another** Google account shows a masked hint
+(`a•••@gmail.com`) and a support address: enough for the right person to
+recognise their own account, not enough for the wrong person to learn a new
+one. A number owned by **the same** account is not a conflict — that is a
+student signing in from a browser we have not seen.
+
+**A row with `google_sub` NULL is not a conflict either.** Every customer
+predating Google sign-in has one, and telling them their own number belongs to
+a stranger would be both wrong and a dead end. They get the plain "you already
+have this" message pointing at the assistant. *Open:* linking an existing row
+to a Google account has no flow yet, so a pre-Google customer cannot sign in
+to the website on their own.
+
+Only a number that **finished** verifying is remembered, for
+`VERIFIED_PHONE_DAYS`, and only in the signed cookie — a half-typed number is
+not a fact about anybody, and somebody who never pays leaves no row behind.
 
 ## The tree
 
