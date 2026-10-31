@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 from shelf import sessions
 from shelf.config import settings
 from shelf.db import SessionLocal, get_db
+from shelf.google import FakeGoogle, get_google
 from shelf.models import User
 from shelf.storage import MemoryStore, get_store
 
@@ -104,7 +105,12 @@ def db_session(test_engine: Engine) -> Iterator[Session]:
 
 
 def make_student(
-    db: Session, ph_no: str = PHONE, *, paid_until: datetime | None = None
+    db: Session,
+    ph_no: str = PHONE,
+    *,
+    paid_until: datetime | None = None,
+    google_sub: str | None = None,
+    email: str | None = None,
 ) -> User:
     """Authorise a number the way the payment site does.
 
@@ -114,6 +120,8 @@ def make_student(
     user = User(
         ph_no=ph_no,
         created_at=SIGNUP,
+        google_sub=google_sub,
+        email=email,
         paid_until=paid_until or datetime.now(tz=UTC) + timedelta(days=30),
     )
     db.add(user)
@@ -163,7 +171,14 @@ def store() -> MemoryStore:
 
 
 @pytest.fixture
-def web(db_session: Session, store: MemoryStore) -> Iterator[TestClient]:
+def google() -> FakeGoogle:
+    """Stands in for Google. Still checks the nonce, so a route that forgets
+    to thread it through fails here rather than in production."""
+    return FakeGoogle()
+
+
+@pytest.fixture
+def web(db_session: Session, store: MemoryStore, google: FakeGoogle) -> Iterator[TestClient]:
     """The real app with only Postgres and object storage substituted.
 
     ``follow_redirects=False`` because the redirect *is* the behaviour under
@@ -173,6 +188,7 @@ def web(db_session: Session, store: MemoryStore) -> Iterator[TestClient]:
 
     app.dependency_overrides[get_db] = lambda: db_session
     app.dependency_overrides[get_store] = lambda: store
+    app.dependency_overrides[get_google] = lambda: google
     try:
         with TestClient(app, follow_redirects=False) as client:
             yield client

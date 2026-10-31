@@ -12,20 +12,22 @@
         scans, pasted notes, deadlines — and gives it back weeks later when you
         ask in plain words. No app to install. No new habit.</p>
 
-      <form class="start" method="post" action="/verify">
-        {% if error %}<div class="error">{{ error }}</div>{% endif %}
-        <label for="phone">Your WhatsApp number</label>
-        <div class="field">
-          <span class="cc">+91</span>
-          <input id="phone" name="phone" inputmode="numeric" autocomplete="tel-national"
-                 placeholder="98765 43210" maxlength="13" value="{{ phone or '' }}" required>
-        </div>
-        <button class="btn btn-primary btn-full" type="submit" style="margin-top:14px">
-          Verify this number
-        </button>
-        <p class="hint">We verify it before taking any money — this is the number the
-          assistant will talk to, so it has to be the phone WhatsApp is on.</p>
-      </form>
+      {% if error %}<div class="error">{{ error }}</div>{% endif %}
+      {% if visitor %}
+        {# Signed in with Google, nobody has paid for this account yet. #}
+        <a class="btn btn-primary btn-full" href="/buy" style="margin-top:14px">
+          Buy now — &#8377;{{ rupees }}/month
+        </a>
+        <p class="hint">Next we'll check the WhatsApp number this should file for.
+          You prove it by sending us a code from your own phone — nothing is
+          charged until that's done.</p>
+      {% else %}
+        <a class="btn btn-primary btn-full" href="/auth/google" style="margin-top:14px">
+          Continue with Google
+        </a>
+        <p class="hint">Signing in tells us who you are. It doesn't charge you,
+          and until you buy, nothing about you is stored.</p>
+      {% endif %}
     </div>
 
     <div class="hero-art" aria-hidden="true">

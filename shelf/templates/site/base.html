@@ -87,6 +87,8 @@
   .spacer{flex:1}
   .navlink{font-size:13.5px;color:var(--steel);text-decoration:none;white-space:nowrap}
   .navlink:hover{color:var(--bone)}
+  .navlink.linkish{background:none;border:0;padding:0;cursor:pointer;font:inherit}
+  .avatar{border-radius:50%;display:block}
   @media (max-width:620px){ .navlink.hide-s{display:none} }
 
   /* ---- buttons --------------------------------------------------------- */
@@ -199,7 +201,19 @@
     <span class="spacer"></span>
     <a class="navlink hide-s" href="/#how">How it works</a>
     <a class="navlink hide-s" href="/#price">Price</a>
-    <a class="navlink" href="/files">Sign in</a>
+    {% if visitor %}
+      {% if visitor.picture %}
+        <img class="avatar" src="{{ visitor.picture }}" alt="" width="24" height="24"
+             referrerpolicy="no-referrer">
+      {% endif %}
+      <span class="navlink">{{ visitor.first_name or visitor.email }}</span>
+      {# POST, so a third-party page cannot sign somebody out with an <img>. #}
+      <form method="post" action="/auth/signout" style="display:inline">
+        <button class="navlink linkish" type="submit">Sign out</button>
+      </form>
+    {% else %}
+      <a class="navlink" href="/auth/google">Sign in</a>
+    {% endif %}
   </div>
 </header>
 

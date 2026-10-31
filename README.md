@@ -17,7 +17,7 @@ on a page.
 uv sync
 cp .env.example .env          # point DATABASE_URL at the assistant's database
 uv run uvicorn shelf.main:app --reload
-uv run pytest                 # 83 tests
+uv run pytest                 # 123 tests
 ```
 
 ---
@@ -99,9 +99,42 @@ repository's tests noticing. The database lookup is the validation.
 
 ## Signing in
 
-There is no password, no email and no login form, and that is finished rather
-than unbuilt. A `users` row is a phone number and a paid-until date, so the
-only thing anyone can demonstrate is possession of the phone.
+**Google is the way in** (added 2026-10-31). There is still no password and no
+login form of our own: Google says who somebody is, and `users.google_sub` —
+Google's *permanent* account id, never the email, which a student can change —
+is what a sign-in is matched against.
+
+**Signing in is not being allowed in.** The callback ends in exactly one of two
+places, decided by the database and never by the token: an entitled `users` row
+with that `google_sub` gets a session and `/files`; anything else — unknown
+account, lapsed subscription, never bought — gets the welcome page with Buy
+now. A real Google account is not a subscription.
+
+Three checks stand between a caller and a session, and they fail separately:
+
+| | Refuses |
+|---|---|
+| `state` | a sign-in this browser did not start — without it a malicious page signs a student into the *attacker's* account, and every note they file afterwards lands in it |
+| `nonce` | a token from some *other* sign-in, replayed |
+| signature, `iss`, `aud`, `exp` | a forged token, one minted for a different application, or one that never expires |
+
+`email_verified` is required too: Google will assert an address the account has
+not proven. Verification uses `joserfc`, with the permitted algorithms named —
+that is what refuses `alg: none` and a token HMAC-signed with Google's own
+public key. `tests/test_auth.py` builds each of those attacks and asserts it is
+refused; nine of the ten checks were confirmed by breaking them one at a time
+and watching the matching test fail.
+
+### The WhatsApp login link
+
+Still here, still works, and is scheduled for removal once the switch-over
+lands. The assistant mints a one-time `/f/<token>`; opening it rotates the row
+so the id that travelled through the chat stops existing. Both doors produce an
+identical session through one function, `sessions.sign_in`, because the device
+cap is only a cap if every door counts against it.
+
+A `users` row is a phone number and a paid-until date, so the only thing anyone
+can demonstrate is possession of the phone.
 
 1. The student says **"my files"** to the assistant, in the chat that already
    proves it. Deterministic shortcut — no LLM call.
@@ -228,6 +261,10 @@ table is the contract.
 | `WHATSAPP_CHAT_URL` | Where the dead-end pages send someone whose link expired. |
 | `LEGAL_*`, `SUPPORT_*`, `GRIEVANCE_*` | Printed verbatim on the policy pages. **The site refuses to start in production while any is blank** — see below. |
 | `R2_*` | Object storage. Empty falls back to an in-memory store — fine on a laptop, and silently destructive in production. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | The OAuth client. **The site refuses to start in production without them** — see `shelf/preflight.py`. |
+| `SESSION_SECRET` | Signs the visitor cookie. Treat it like a password: it is the whole pre-payment identity. Blank in production is refused; blank in development uses a stable placeholder printed in this repository. |
+| `SITE_URL` | This site's public origin. The Google redirect URI is built from it rather than from the request, so a forwarded `Host` header cannot redirect a sign-in. |
+| `VERIFIED_PHONE_DAYS` | How long a verified number is offered back. Default 30. |
 
 The session cookie is `Secure` only when `APP_ENV=prod`; over plain HTTP on a
 laptop a secure cookie is never set and nothing works.

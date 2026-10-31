@@ -34,7 +34,7 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from shelf import legal, signup, throttle
+from shelf import legal, signup, throttle, visitor
 from shelf.config import settings
 from shelf.db import DbSession
 
@@ -57,6 +57,10 @@ def _page(request: Request, name: str, **context: object) -> HTMLResponse:
         name=f"site/{name}",
         context={
             "rupees": RUPEES,
+            # Who Google says this is, from the signed cookie. Every template
+            # gets it, because the header renders on all of them -- and it is
+            # never an entitlement: the file browser still asks the database.
+            "visitor": visitor.google(request),
             "d": legal.details(),
             "blanks": legal.missing(),
             "whatsapp_url": f"https://wa.me/{settings.whatsapp_display_number}"
@@ -74,8 +78,23 @@ def _pretty(phone: str) -> str:
 
 
 @router.get("/", response_class=HTMLResponse)
-def landing(request: Request) -> HTMLResponse:
-    return _page(request, "landing.html")
+def landing(request: Request, signin: str = "") -> HTMLResponse:
+    """The welcome page, in whichever of its two states applies.
+
+    Signed out it pitches and offers Google; signed in but unpaid it pitches
+    and offers Buy now. A *paid* visitor never lands here from the callback --
+    they are sent to /files -- but they can still navigate here, and the header
+    tells them who they are either way.
+    """
+    return _page(
+        request,
+        "landing.html",
+        # One message for every way a sign-in can fail. Which one it was is
+        # information the caller did not already have.
+        error="That sign-in didn't complete. Please try again."
+        if signin == "failed"
+        else None,
+    )
 
 
 @router.post("/verify", response_class=HTMLResponse)

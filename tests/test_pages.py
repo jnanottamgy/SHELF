@@ -384,12 +384,20 @@ class TestThePublicSite:
     failure is invisible from every other direction.
     """
 
-    def test_the_landing_page_asks_for_a_number_before_any_price(
+    def test_a_signed_out_visitor_is_offered_google_and_not_a_payment(
         self, web: TestClient
     ) -> None:
+        """Rewritten 2026-10-31 with the Google sign-in flow.
+
+        It used to assert the landing page asked for a phone number before
+        showing a price. The number is still proved before anybody is charged
+        -- that property now lives on /buy and is pinned there -- but the first
+        step is Google, so this page no longer has the field.
+        """
         page = web.get("/").text
-        assert page.index('id="phone"') < page.index("Get started")
-        assert "Verify this number" in page
+
+        assert "/auth/google" in page
+        assert 'id="phone"' not in page
 
     def test_the_verify_page_carries_the_code_into_the_deep_link(
         self, web: TestClient, monkeypatch: pytest.MonkeyPatch
@@ -449,10 +457,18 @@ class TestTheSignupHandshake:
         self, web: TestClient, db_session: Session
     ) -> None:
         from shelf.models import SignupCode
+        from shelf.phone import InvalidPhoneNumber, normalise
+
+        try:
+            normalise("12345")
+        except InvalidPhoneNumber as refused:
+            expected = str(refused)
 
         page = web.post("/verify", data={"phone": "12345"}).text
 
-        assert "Verify this number" in page  # back on the landing page
+        # The exact refusal, shown to the student rather than swallowed. A
+        # number we cannot reach is one we must not take money for.
+        assert expected in page
         assert db_session.scalar(select(SignupCode)) is None
 
     def test_an_existing_customer_is_not_charged_twice(

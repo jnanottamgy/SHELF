@@ -47,6 +47,26 @@ class Settings(BaseSettings):
     # or a student in grace is answered in chat and locked out of their files.
     grace_days: int = 3
 
+    # This site's own public origin, e.g. https://shelf.example. Used to build
+    # the Google redirect URI, which Google compares against a registered list
+    # -- deriving it from the request instead would let a forwarded Host header
+    # decide where a sign-in returns to.
+    site_url: str = ""
+
+    # --- Google sign-in -------------------------------------------------
+    # The only way into SHELF. Empty in dev, where tests substitute the client
+    # outright; preflight refuses to start a production site without them.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    # Signs the visitor cookie. Treat it exactly like a password: anyone who
+    # holds it can mint a cookie claiming to be any Google account, which is
+    # the whole pre-payment identity. Empty in dev only.
+    session_secret: str = ""
+    # How long a verified number is remembered for, so a student who comes
+    # back does not re-prove a number they already proved. Only a number that
+    # *finished* verification is ever written here.
+    verified_phone_days: int = 30
+
     # Where the assistant lives: the dialable number students message, used for
     # the sign-up deep link and the "ask for a new link" dead ends. Digits only,
     # 91XXXXXXXXXX -- the same shape ck_users_ph_no_digits enforces on the row.

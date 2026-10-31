@@ -68,7 +68,18 @@ def activate(db: Session, token: str, now: datetime) -> str | None:
     user_id = row.user_id
     db.delete(row)
     db.flush()  # the rotation is a delete and an insert, in that order
+    return sign_in(db, user_id, now)
 
+
+def sign_in(db: Session, user_id: int, now: datetime) -> str:
+    """Open a signed-in session for a student whose identity is already settled.
+
+    Two callers, two different proofs, one session: ``activate`` has just spent
+    a link the assistant minted, and the Google callback has just verified an
+    ID token naming a ``users`` row. Neither proof is stronger for being newer,
+    so what they produce must be identical -- the device cap in particular,
+    which is only a cap if every door counts against it.
+    """
     session_id = _new_id()
     db.add(
         WebSession(
