@@ -72,9 +72,14 @@
   h1,h2,h3{text-wrap:balance}
 
   /* ---- the fixed half -------------------------------------------------- */
+  /* The stage hands over. A full-bleed band passing in front of a half-visible
+     3D scene reads as a rendering fault, not a layer -- so the scene fades out
+     while one is on screen and comes back after it, and is gone for good by the
+     closing band. Driven from the bands' own rects in script. */
   .stage{
     position:fixed; top:0; left:0; width:var(--stage); height:100svh;
     padding:20px 0 20px 20px; z-index:1;
+    transition:opacity .4s ease;
   }
   .stage-inner{
     position:relative; width:100%; height:100%;
@@ -90,7 +95,11 @@
   .legend i{width:11px;height:11px;display:block}
   .legend i.m{background:var(--material)} .legend i.p{background:var(--pyq)}
   .legend i.f{background:var(--info)}
-  .stage-note{position:absolute;right:26px;top:24px;font-size:var(--t5);color:var(--steel-2)}
+  /* Bottom right, opposite the legend: at the top it sat in the plates' own
+     flight path and a falling plate went straight through the words. */
+  .stage-note{position:absolute;left:28px;bottom:58px;font-size:var(--t5);
+              color:var(--steel-2);opacity:0;transition:opacity .5s ease}
+  .stage-note.on{opacity:1}
 
   /* ---- the scrolling half ---------------------------------------------- */
   .flow{margin-left:var(--stage); padding:0 var(--gutter)}
@@ -99,7 +108,7 @@
      stops short leaves the page's right margin open with nothing to close it. */
   .col section > p{max-width:52ch}
   .slip{max-width:30rem}
-  .mod{max-width:40rem}
+  .mod{max-width:46rem}
 
   nav{
     position:absolute; top:0; right:0; z-index:3;
@@ -112,7 +121,7 @@
   nav a.act:hover{background:#E6F0FF}
 
   .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;
-        position:relative;padding-bottom:30px}
+        position:relative;padding-bottom:clamp(44px,7svh,96px)}
   /* The crossing wordmark. It sits at the foot of the hero in ordinary flow and
      reaches back over the stage with a negative margin, so it ties the two
      halves together, closes the hero's lower right, and -- being unpinned --
@@ -163,10 +172,18 @@
              font-size:var(--t5);font-weight:600}
 
   /* small proof beside text */
-  .mod{display:flex;gap:22px;align-items:flex-start;margin:0 0 clamp(68px,7.5vw,104px)}
+  /* Stacked, and the picture takes the whole measure. Side by side it was
+     360px of a 900px screenshot -- 40%, which turns its own text into grey
+     hatching. Cropped at the right instead, where these screens hold only
+     chevrons, so the words stay the size they were drawn. */
+  .mod{display:flex;flex-direction:column;gap:16px;align-items:stretch;
+       margin:0 0 clamp(68px,7.5vw,104px)}
   .mod:last-child{margin-bottom:0}
-  .shot{flex:none;width:360px;background:var(--deep-2);overflow:hidden;line-height:0}
-  .shot img{width:100%;height:auto;display:block}
+  /* The rule needs air under it: these screens start with their own heading at
+     the very top edge, and a 2px accent flush against it reads as a strike. */
+  .shot{width:100%;background:var(--deep-2);overflow:hidden;line-height:0;
+        border-top:2px solid var(--sky);padding-top:15px}
+  .shot img{width:125%;max-width:none;height:auto;display:block}
   .mod .txt{min-width:0}
   .mod p{font-size:var(--t5);margin:0;color:var(--read)}
 
@@ -211,7 +228,7 @@
   .qa b{color:var(--bone);font-weight:500}
 
   /* first step, already open */
-  .close{background:var(--sky);color:#08101C;min-height:90svh;display:grid;
+  .close{background:var(--sky);color:#08101C;min-height:76svh;display:grid;
          grid-template-columns:1fr 1fr;align-items:end;gap:40px;
          padding:clamp(40px,6vw,80px) clamp(26px,4vw,72px)}
   .close h2{color:#08101C;font-size:clamp(40px,4.6vw,70px);line-height:.96;margin:0}
@@ -231,8 +248,13 @@
   .open .btn:hover{background:#17233A}
   .open .fine{font-size:var(--t5);color:#6B7893;margin:12px 0 0}
 
-  footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:24px;
-         padding:30svh var(--gutter) 30px}
+  /* Full-bleed and opaque: inside the column it had 168px a side and broke the
+     one line it carries over three, while the fixed stage showed through the
+     page's last screen with its slabs sliced by the viewport edge. */
+  footer{position:relative;z-index:2;background:var(--deep);
+         margin-left:calc(-1 * var(--stage) - var(--gutter));width:100vw;
+         display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:24px;
+         padding:clamp(76px,10vh,132px) clamp(26px,4vw,72px) 34px}
   footer .l,footer .r{color:var(--steel)}
   footer .c{display:flex;gap:24px;justify-content:center}
   footer .r{text-align:right}
@@ -286,12 +308,18 @@
     .under,.close .sub{max-width:56ch}
     .slip,.mod{max-width:none}
     .col section > p{max-width:62ch}
-    .menu,.qa{columns:1}
     .close{grid-template-columns:1fr;align-items:start}
     .close h2{font-size:13vw}
-    footer{grid-template-columns:1fr;padding:18svh 16px 28px}
+    footer{grid-template-columns:1fr;margin-left:-16px;width:100vw;
+           padding:clamp(60px,9vh,96px) 16px 28px}
     footer .c{justify-content:flex-start;flex-wrap:wrap}
     footer .r{text-align:left}
+  }
+  /* The price list and the answers keep two columns down to phone width. In
+     one wide column a short row ("Cancelling ... free") puts its two halves at
+     opposite edges with a third of the page empty between them. */
+  @media (max-width:620px){
+    .menu,.qa{columns:1}
   }
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
@@ -577,6 +605,17 @@
     ctx.setTransform(d, 0, 0, d, 0, 0);
     S = Math.min(W, H) / 430;
     ox = W / 2; oy = H / 2 + 64 * S;
+    fit();
+  }
+  /* A plate sliced in half by the stage's own edge reads as a clipping fault,
+     not as depth. Only the plates that would actually reach past it are pulled
+     in, along their own direction, so the scatter keeps its shape. */
+  function fit() {
+    var lim = (W / 2 - 30 * S) / (COS30 * S);
+    plates.forEach(function (pl) {
+      var d = Math.abs(pl.cx0 - pl.cz0), k = d > lim ? lim / d : 1;
+      pl.cx = pl.cx0 * k; pl.cz = pl.cz0 * k;
+    });
   }
   function pt(x, y, z) {
     return [ox + (x - z) * COS30 * S, oy + ((x + z) * SIN30 - y) * S];
@@ -608,8 +647,8 @@
   for (var i = 0; i < N; i++) {
     var sh = i % 3, slot = Math.floor(i / 3);
     plates.push({
-      shelf: sh, cx: (Math.random() - .5) * 500, cy: 140 + Math.random() * 460,
-      cz: (Math.random() - .5) * 500, cyaw: Math.random() * 6.283,
+      shelf: sh, cx0: (Math.random() - .5) * 500, cy: 50 + Math.random() * 400,
+      cz0: (Math.random() - .5) * 500, cyaw: Math.random() * 6.283,
       t0: .08 + (i / N) * .38, dur: .26,
       rx: -74 + slot * 15, rz: -34 + (slot % 3) * 7, drift: Math.random() * 6.283
     });
@@ -635,7 +674,7 @@
       }
       items.push({ x: 0, y: sh.y, z: 0, w: 104, h: 7, d: 60,
                    col: shade(TINT[sh.t], .60), yaw: 0,
-                   a: (i === 1 ? 1 - fold : 1) * (p > .05 ? 1 : p / .05) });
+                   a: (i === 1 ? 1 - fold : 1) * (.24 + .76 * Math.min(1, p / .06)) });
     });
 
     plates.forEach(function (pl) {
@@ -659,16 +698,33 @@
     items.forEach(function (o) { box(o.x, o.y, o.z, o.w, o.h, o.d, o.col, o.yaw, o.a); });
   }
 
+  var stage = document.querySelector('.stage');
+  var bands = [].slice.call(document.querySelectorAll('.wide, footer'));
+  function cover() {
+    if (!stage) return;
+    if (innerWidth <= 900) { stage.style.opacity = ''; return; }
+    var vh = innerHeight, worst = 0;
+    bands.forEach(function (b) {
+      var r = b.getBoundingClientRect();
+      var seen = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      if (seen > 0) worst = Math.max(worst, seen / vh);
+    });
+    stage.style.opacity = String(1 - Math.max(0, Math.min(1, (worst - .16) / .26)));
+  }
+
   function onScroll() {
     var h = Math.max(1, document.body.scrollHeight - innerHeight);
     P = still ? 1 : Math.min(1, Math.max(0, scrollY / (h * .60)));
     var lg = document.getElementById('legend');
     if (lg) lg.classList.toggle('on', P > .26 && P < .78);
+    var nt = document.querySelector('.stage-note');
+    if (nt) nt.classList.toggle('on', P < .70);
+    cover();
   }
   function frame(now) { tms = now || 0; render(); requestAnimationFrame(frame); }
 
   size(); onScroll(); render();
-  addEventListener('resize', function () { size(); render(); }, { passive: true });
+  addEventListener('resize', function () { size(); cover(); render(); }, { passive: true });
   addEventListener('scroll', onScroll, { passive: true });
   requestAnimationFrame(frame);
 
