@@ -1,3 +1,4 @@
+{% from "site/base.html" import logomark %}
 {# The one layout. Every page is this plus a block, so the header, the search
    box and the footer cannot drift apart between views. #}
 <!doctype html>
@@ -7,45 +8,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="same-origin">
-<meta name="theme-color" content="#0d5c55" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1211" media="(prefers-color-scheme: dark)">
-<title>{% block title %}Your files{% endblock %} · Academic Assistant</title>
+<meta name="theme-color" content="#0B1220">
+<title>{% block title %}Your files{% endblock %} · SHELF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-{# One display face, one weight, swap-on-load. Body text stays on the system
-   stack on purpose: this is read on mid-range Android over mobile data, and a
-   webfont for the interface itself would be paid for on every cold load by
-   exactly the students this is for. #}
+{# Sora for the wordmark and headings only -- the same display face as the
+   public site, so the two halves read as one product. **Body text stays on the
+   system stack**, which is the public site's one deliberate difference: that
+   page is read once, this one is read every week on mid-range Android over
+   mobile data, and a webfont for the interface itself would be paid for on
+   every cold load by exactly the students this is for. #}
 <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap">
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;600&display=swap">
 <style>
   :root{
-    color-scheme: light;
-    --paper:#f6f5f1; --card:#fff; --raised:#fffdf9;
-    --ink:#14181a; --ink-2:#4b5357; --muted:#7d868b;
-    --line:#e4e2dc; --line-2:#efedE7;
-    --accent:#0d5c55; --accent-soft:#e3efec; --accent-ink:#0b4b45;
-    --material:#0d5c55; --material-soft:#e3efec;
-    --pyq:#8a4b1f;      --pyq-soft:#f6ebe1;
-    --info:#3a4a80;     --info-soft:#e7eaf6;
-    --warn:#8a5a10;
-    --shadow:0 1px 2px rgba(20,24,26,.05), 0 6px 18px -12px rgba(20,24,26,.22);
+    /* The brand palette, shared with the public site. Dark only, as the site
+       is: a library that inverted in daylight while the pitch page stayed navy
+       would read as two products, which is the thing this change exists to
+       stop. */
+    color-scheme: dark;
+    --paper:#0B1220;      /* brand DEEP -- the ground */
+    --card:#0E1626;       /* raised surface */
+    --raised:#121C2F;     /* hover, input wells */
+    --ink:#F8F9FA;        /* brand BONE */
+    --ink-2:#B9C6DC;
+    --muted:#8A99B4;      /* brand STEEL */
+    --line:rgba(207,228,255,.13);
+    --line-2:rgba(207,228,255,.07);
+    --accent:#CFE4FF;     /* brand SKY */
+    --accent-soft:rgba(207,228,255,.12); --accent-ink:#CFE4FF;
+    /* The three shelves, re-picked to sit on navy rather than on cream. */
+    --material:#CFE4FF; --material-soft:rgba(207,228,255,.12);
+    --pyq:#E4B46A;      --pyq-soft:rgba(228,180,106,.14);
+    --info:#7FD4B0;     --info-soft:rgba(127,212,176,.14);
+    --warn:#E4B46A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 22px -14px rgba(0,0,0,.75);
     --radius:14px;
     --gutter:16px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      color-scheme: dark;
-      --paper:#0e1211; --card:#171b1b; --raised:#1c2120;
-      --ink:#eceeed; --ink-2:#b9c0c1; --muted:#868f90;
-      --line:#272d2d; --line-2:#202625;
-      --accent:#57c3b2; --accent-soft:#16302c; --accent-ink:#8fdccf;
-      --material:#57c3b2; --material-soft:#16302c;
-      --pyq:#d79b62;      --pyq-soft:#33261a;
-      --info:#8fa2e6;     --info-soft:#1d2338;
-      --warn:#d8a441;
-      --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 22px -14px rgba(0,0,0,.7);
-    }
   }
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0}
@@ -67,12 +66,15 @@
     border-bottom:1px solid var(--line);
   }
   .bar .row{display:flex;align-items:center;gap:12px;padding:11px 0}
-  .mark{
-    font-family:"Instrument Serif",Georgia,"Times New Roman",serif;
-    font-size:23px; letter-spacing:.005em; text-decoration:none; color:var(--ink);
-    white-space:nowrap; line-height:1;
+  /* The lockup, identical to the public site's: the drawn mark plus the
+     letter-spaced wordmark. Same art, same spacing, so they cannot drift. */
+  .lockup{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit}
+  .lockup .mark{display:block;width:24px;flex:none}
+  .wordmark{
+    font-family:"Sora","Helvetica Neue",Arial,sans-serif;font-weight:300;
+    letter-spacing:.42em;text-indent:.42em;font-size:13.5px;color:var(--ink);
+    white-space:nowrap;
   }
-  .mark i{font-style:italic;color:var(--accent)}
   .spacer{flex:1}
   .tally{display:flex;gap:14px;font-size:12.5px;color:var(--muted);white-space:nowrap}
   .tally b{color:var(--ink-2);font-weight:600;font-variant-numeric:tabular-nums}
@@ -84,7 +86,7 @@
   form.find input::placeholder{color:var(--muted)}
   form.find input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
   form.find button{
-    padding:10px 15px;font-size:14.5px;font-weight:600;color:var(--card);
+    padding:10px 15px;font-size:14.5px;font-weight:600;color:#08101C;
     background:var(--accent);border:0;border-radius:10px;cursor:pointer;
   }
   @media (max-width:560px){ .tally{display:none} }
@@ -97,8 +99,8 @@
   nav.crumbs span.sep{opacity:.5}
   nav.crumbs b{color:var(--ink-2);font-weight:600}
 
-  h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;
-     font-size:clamp(30px,7vw,42px);line-height:1.08;letter-spacing:-.01em;
+  h1{font-family:"Sora","Helvetica Neue",Arial,sans-serif;font-weight:200;
+     font-size:clamp(29px,6.6vw,40px);line-height:1.06;letter-spacing:-.025em;
      margin:2px 0 6px;text-wrap:balance}
   .sub{color:var(--ink-2);margin:0 0 22px;font-size:15px;max-width:60ch}
   h2{font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
@@ -167,11 +169,11 @@
   /* The signed-out pages. Centred and given air, because they are the whole
      page rather than a message inside one. */
   .gate{max-width:34rem;margin:0 auto;padding:12vh 0 0;text-align:center}
-  .gate .mark{display:inline-block;font-size:17px;color:var(--muted);margin-bottom:18px}
+  .gate .gate-lockup{display:inline-flex;margin-bottom:20px}
   .gate .sub{margin-left:auto;margin-right:auto}
   .gate .hint{color:var(--muted);font-size:14.5px}
   .cta{display:inline-block;margin-top:14px;padding:11px 17px;border-radius:10px;
-       background:var(--accent);color:var(--card);font-weight:600;text-decoration:none}
+       background:var(--accent);color:#08101C;font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -179,7 +181,9 @@
 <header class="bar">
   <div class="wrap">
     <div class="row">
-      <a class="mark" href="/files">Academic <i>Assistant</i></a>
+      <a class="lockup" href="/files" aria-label="SHELF — all files">
+        {{ logomark(24) }}<span class="wordmark">SHELF</span>
+      </a>
       <span class="spacer"></span>
       <div class="tally">
         <span><b>{{ file_count }}</b> saved</span>

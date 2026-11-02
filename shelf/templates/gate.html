@@ -1,4 +1,5 @@
 {% extends "shell.html" %}
+{% from "site/base.html" import logomark %}
 {% set signed_in = false %}
 {% block title %}{{ headline }}{% endblock %}
 {% block body %}
@@ -6,7 +7,7 @@
    this is the page a student lands on when something went wrong, and it has
    to look like the product they paid for. #}
 <div class="gate">
-  <span class="mark">Academic <i>Assistant</i></span>
+  <span class="lockup gate-lockup">{{ logomark(26) }}<span class="wordmark">SHELF</span></span>
   <h1>{{ headline }}</h1>
   <p class="sub">{{ message }}</p>
   {% if hint %}<p class="sub hint">{{ hint }}</p>{% endif %}
