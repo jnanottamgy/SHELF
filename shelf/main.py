@@ -18,8 +18,10 @@ against one database is how a half-applied schema happens.
 """
 
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -60,6 +62,15 @@ app.add_middleware(
     max_age=settings.verified_phone_days * 86400,
     same_site="lax",
     https_only=settings.app_env == "prod",
+)
+
+# Marketing images for the landing page: real crops of this product's own
+# interface. Mounted rather than inlined because a data URI of a screenshot is
+# paid for on every page load and cannot be cached separately from the HTML.
+app.mount(
+    "/static",
+    StaticFiles(directory=str(Path(__file__).parent / "static")),
+    name="static",
 )
 
 app.include_router(auth_router)

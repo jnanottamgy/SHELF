@@ -1,188 +1,746 @@
-{% extends "site/base.html" %}
-{% from "site/base.html" import logomark %}
-{% block title %}SHELF — your semester, filed{% endblock %}
-{% block body %}
+{# The landing page. Standalone on purpose: it does not extend site/base.html,
+   because the direction gives it a fixed half-screen stage and no top logo --
+   the giant wordmark *is* the logo. Every other site page keeps base.html.
 
-<section class="hero">
-  <div class="wrap hero-inner">
-    <div class="hero-copy">
-      <p class="eyebrow">Build · Organise · Scale</p>
-      <h1>Forward it once.<br>Ask for it <em>whenever</em>.</h1>
-      <p class="lead">One WhatsApp contact that files everything you send it — slides,
-        scans, pasted notes, deadlines — and gives it back weeks later when you
-        ask in plain words. No app to install. No new habit.</p>
+   Direction: "split stage" (tasteskill, seed 262542071). Half the screen never
+   moves and holds the object; the other half scrolls and carries the argument.
 
-      {% if error %}<div class="error">{{ error }}</div>{% endif %}
-      {% if visitor %}
-        {# Signed in with Google, nobody has paid for this account yet. #}
-        <a class="btn btn-primary btn-full" href="/buy" style="margin-top:14px">
-          Buy now — &#8377;{{ rupees }}/month
-        </a>
-        <p class="hint">Next we'll check the WhatsApp number this should file for.
-          You prove it by sending us a code from your own phone — nothing is
-          charged until that's done.</p>
-      {% else %}
-        <a class="btn btn-primary btn-full" href="/auth/google" style="margin-top:14px">
-          Continue with Google
-        </a>
-        <p class="hint">Signing in tells us who you are. It doesn't charge you,
-          and until you buy, nothing about you is stored.</p>
-      {% endif %}
-    </div>
+   The idea: the logomark is already two extruded isometric slabs -- a shelf. So
+   the fixed half is that mark, built for real in 3D, and it performs the
+   product: the class group's forwarded chaos falls in, gets caught, and files
+   itself onto Material, PYQ and Info. The last quarter folds the shelves into
+   the exact mark on the browser tab.
 
-    <div class="hero-art" aria-hidden="true">
-      <div class="glow"></div>
-      {{ logomark(210) }}
-      <div class="horizon"></div>
-    </div>
-  </div>
-</section>
+   Why no Three.js: the mark is *isometric*, not perspective, so the projection
+   is two lines of arithmetic. A WebGL library would be ~600KB on a cold load,
+   paid for by a student on mobile data, to do less faithfully what a 2D canvas
+   does exactly. The renderer is below in full and depends on nothing.
 
-<section class="section" id="how">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Getting started</p>
-      <h2>Three steps, and the first two happen once.</h2>
-    </div>
-    <ol class="steps">
-      <li>
-        <span class="num">01</span>
-        <h3>Verify your number</h3>
-        <p>You send the assistant a six-character code from your own WhatsApp.
-          That is the whole check — the message arriving proves the phone is yours,
-          so there is no OTP to wait for and nothing to intercept.</p>
-      </li>
-      <li>
-        <span class="num">02</span>
-        <h3>Pay ₹89 for the month</h3>
-        <p>Razorpay handles the card or UPI mandate. Access starts the moment the
-          payment clears, and it is tied to the number you just verified.</p>
-      </li>
-      <li>
-        <span class="num">03</span>
-        <h3>Start forwarding</h3>
-        <p>Send a file with a caption and it is filed. Ask for it back in whatever
-          words you would use with a friend.</p>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">What it does</p>
-      <h2>It reads captions, not filenames.</h2>
-      <p class="lead" style="margin-top:14px">A scan arrives called
-        <span class="mono-inline">CamScanner 03-01-2026 10.14.pdf</span>. You captioned it
-        "DBMS unit 2". Five weeks later you ask for your DBMS unit 2 notes and get that
-        file — because it was filed under what you said, not what your scanner named it.</p>
-    </div>
-
-    <div class="grid g3">
-      <article class="panel feature">
-        <p class="ftag">Storage</p>
-        <h3>Send it, it's filed</h3>
-        <p>Files, links and pasted text all become one row under the right subject.
-          Anything it cannot place, it asks about once — and never nags again.</p>
-      </article>
-      <article class="panel feature">
-        <p class="ftag">Retrieval</p>
-        <h3>Ask the way you talk</h3>
-        <p>"send my os previous year papers". No folder names, no search syntax,
-          no remembering what you called it at the time.</p>
-      </article>
-      <article class="panel feature">
-        <p class="ftag">Deadlines</p>
-        <h3>Nudges that actually fire</h3>
-        <p>Tell it something is due Friday and it remembers, then messages you
-          before it is. Weekly labs get one reminder a week, not thirty rows.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="price">
-  <div class="wrap price-row">
-    <div class="section-head" style="margin-bottom:0">
-      <p class="eyebrow">Price</p>
-      <h2>One number, no tiers.</h2>
-      <p class="lead" style="margin-top:14px">Everything above, for every subject you
-        are taking, for as long as you are subscribed.</p>
-    </div>
-
-    <div class="panel pricecard">
-      <div class="amount">
-        <span class="rupee">₹</span><span class="figure">{{ rupees }}</span>
-        <span class="per">/ month</span>
-      </div>
-      <hr class="rule" style="margin-block:22px">
-      <ul class="ticks">
-        <li>Unlimited files, notes and deadlines</li>
-        <li>A browsable drive of everything you've sent</li>
-        <li>Cancel any time — you keep the month you paid for</li>
-        <li>Ask for a copy of your data, or its deletion, whenever</li>
-      </ul>
-      <a class="btn btn-primary btn-full" href="#top" style="margin-top:26px"
-         onclick="document.getElementById('phone').focus();return false;">Get started</a>
-      <p class="hint" style="text-align:center">Verification first. We only charge a
-        number we know we can reach.</p>
-    </div>
-  </div>
-</section>
-
+   Everything reads and works with JavaScript off; the canvas is the only part
+   that needs it, and its absence leaves the page whole. #}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B1220">
+<title>SHELF — forward it once, ask for it whenever</title>
+<meta name="description" content="One WhatsApp contact that files the notes, slides and deadlines you forward, and gives them back when you ask in plain words. ₹{{ rupees }} a month.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SHELF">
+<meta property="og:title" content="SHELF — forward it once, ask for it whenever">
+<meta property="og:description" content="One WhatsApp contact that files what you forward, and gives it back when you ask. ₹{{ rupees }} a month.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 30 118 102'%3E%3Crect width='122' height='132' x='0' y='18' fill='%230B1220'/%3E%3Cpolygon points='12,98 48,80 74,93 38,111' fill='%236E82A4'/%3E%3Cpolygon points='38,111 74,93 74,105 38,123' fill='%232A3757'/%3E%3Cpolygon points='48,56 84,38 110,51 74,69' fill='%23E4EDFB'/%3E%3Cpolygon points='74,69 110,51 110,63 74,81' fill='%238195B4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@200;300;400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-  .hero{padding-block:clamp(48px,8vw,92px) clamp(56px,8vw,104px);position:relative;overflow:hidden}
-  .hero-inner{display:grid;gap:clamp(40px,5vw,72px);grid-template-columns:1.15fr .85fr;align-items:center}
-  @media (max-width:880px){
-    .hero-inner{grid-template-columns:1fr}
-    .hero-art{order:-1;justify-self:start}
+  :root{
+    color-scheme: dark;
+    /* One ground, one ink, one accent -- the brand's own. */
+    --deep:#0B1220; --deep-2:#0E1626; --deep-3:#121C2F;
+    --bone:#F8F9FA; --read:#DCE4F0; --steel:#8A99B4; --steel-2:#5E6C86;
+    --sky:#CFE4FF;
+    --line:rgba(207,228,255,.13);
+    /* The three shelves keep the colours the library already uses. */
+    --material:#CFE4FF; --pyq:#E4B46A; --info:#7FD4B0;
+
+    --display:"Sora","Helvetica Neue",Arial,sans-serif;
+    --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+
+    /* Five sizes. No sixth. */
+    --t1:clamp(88px,20.5vw,310px);   /* the monument */
+    --t2:clamp(31px,3vw,44px);        /* section headings: modest, per the direction */
+    --t3:clamp(21px,2.1vw,28px);     /* statements */
+    --t4:19px;                        /* item names */
+    --t5:16px;                        /* running text, nav, footer */
+
+    --gutter:24px;
+    --stage:47vw;                     /* the fixed half */
   }
-  .start{margin-top:36px;max-width:420px}
-  .hero-art{position:relative;display:grid;place-items:center;
-            padding:clamp(28px,4vw,52px);isolation:isolate}
-  .hero-art .mark{position:relative;z-index:2;filter:drop-shadow(0 26px 54px rgba(0,0,0,.66))}
-  /* The one lit moment, both lifted straight from the brand sheet: a pool of
-     light behind the mark, and the lit edge of a plane running under it. */
-  .glow{position:absolute;inset:-14%;z-index:1;
-        background:radial-gradient(48% 44% at 50% 42%, rgba(150,186,244,.26), transparent 72%)}
-  .horizon{position:absolute;left:-55%;right:-55%;top:66%;height:1px;z-index:1;
-           transform:rotate(-8.5deg);transform-origin:center;
-           background:linear-gradient(90deg,transparent 4%,rgba(207,228,255,.9) 46%,rgba(207,228,255,.18) 72%,transparent);
-           box-shadow:0 0 30px 1px rgba(207,228,255,.4)}
-  .horizon::after{content:"";position:absolute;inset:1px 0 auto;height:110px;
-                  background:linear-gradient(180deg,rgba(120,160,225,.13),transparent 78%)}
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{
+    background:var(--deep); color:var(--bone);
+    font:var(--t5)/1.6 var(--body);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  a{color:inherit}
+  ::selection{background:var(--sky);color:var(--deep)}
+  :focus-visible{outline:2px solid var(--sky);outline-offset:3px}
+  h1,h2,h3{text-wrap:balance}
 
-  .mono-inline{font-family:var(--mono);font-size:.88em;color:var(--sky-dim);
-               background:var(--deep-2);padding:2px 7px;border-radius:5px;
-               border:1px solid var(--line-2);white-space:nowrap}
+  /* ---- the fixed half -------------------------------------------------- */
+  .stage{
+    position:fixed; top:0; left:0; width:var(--stage); height:100svh;
+    padding:20px 0 20px 20px; z-index:1;
+  }
+  .stage-inner{
+    position:relative; width:100%; height:100%;
+    background:var(--deep-2); overflow:hidden;
+  }
+  #scene{display:block;width:100%;height:100%}
+  .legend{
+    position:absolute; left:28px; bottom:26px; display:flex; gap:22px;
+    font-size:var(--t5); color:var(--steel); opacity:0; transition:opacity .5s ease;
+  }
+  .legend.on{opacity:1}
+  .legend span{display:flex;align-items:center;gap:8px}
+  .legend i{width:11px;height:11px;display:block}
+  .legend i.m{background:var(--material)} .legend i.p{background:var(--pyq)}
+  .legend i.f{background:var(--info)}
+  .stage-note{position:absolute;right:26px;top:24px;font-size:var(--t5);color:var(--steel-2)}
 
-  /* Numbered because these really are a sequence — you cannot pay before you
-     verify, and you cannot forward before you pay. */
-  .steps{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line-2);
-         border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
-  @media (min-width:800px){ .steps{grid-template-columns:repeat(3,1fr)} }
-  .steps li{background:var(--deep-2);padding:30px 26px 32px}
-  .steps .num{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.2em;
-              color:var(--sky-dim);margin-bottom:22px}
-  .steps p{margin:0;font-size:14.5px}
+  /* ---- the scrolling half ---------------------------------------------- */
+  .flow{margin-left:var(--stage); padding:0 var(--gutter)}
+  .col{padding:0 clamp(24px,3.4vw,64px)}
+  /* The narrow measure belongs to the text, not to the column: a column that
+     stops short leaves the page's right margin open with nothing to close it. */
+  .col section > p{max-width:52ch}
+  .slip{max-width:30rem}
+  .mod{max-width:40rem}
 
-  .feature{padding:26px 24px 28px}
-  .ftag{font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;
-        color:var(--sky-dim);margin:0 0 16px}
-  .feature p{margin:0;font-size:14.5px}
+  nav{
+    position:absolute; top:0; right:0; z-index:3;
+    display:flex; gap:28px; align-items:center;
+    padding:28px clamp(24px,3.4vw,56px);
+  }
+  nav a{font-size:var(--t5);color:var(--steel);text-decoration:none;transition:color .14s}
+  nav a:hover{color:var(--bone)}
+  nav a.act{color:#08101C;background:var(--sky);padding:9px 17px;font-weight:600}
+  nav a.act:hover{background:#E6F0FF}
 
-  .price-row{display:grid;gap:clamp(32px,5vw,64px);grid-template-columns:1fr minmax(320px,.78fr);align-items:start}
-  @media (max-width:880px){ .price-row{grid-template-columns:1fr} }
-  .pricecard{padding:32px 30px 30px}
-  .amount{display:flex;align-items:baseline;gap:4px;font-family:var(--display);color:var(--bone)}
-  .rupee{font-size:30px;font-weight:200}
-  .figure{font-size:60px;font-weight:200;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
-  .per{font-family:var(--body);font-size:15px;color:var(--steel);margin-left:8px}
-  .ticks{list-style:none;margin:0;padding:0;display:grid;gap:11px}
-  .ticks li{position:relative;padding-left:26px;font-size:14.5px;color:var(--steel)}
-  .ticks li::before{content:"";position:absolute;left:4px;top:.42em;width:6px;height:11px;
-                    border-right:1.6px solid var(--sky);border-bottom:1.6px solid var(--sky);
-                    transform:rotate(42deg)}
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;
+        position:relative;padding-bottom:30px}
+  /* The crossing wordmark. It sits at the foot of the hero in ordinary flow and
+     reaches back over the stage with a negative margin, so it ties the two
+     halves together, closes the hero's lower right, and -- being unpinned --
+     scrolls away instead of riding over every section below. */
+  h1{
+    margin:auto 0 0; z-index:2; position:relative;
+    margin-left:calc(-1 * var(--stage) + 36vw);
+    font-family:var(--display); font-weight:200; font-size:var(--t1);
+    letter-spacing:-.05em; line-height:.84; color:var(--bone);
+  }
+  .hero-read{margin:auto 0}
+  .lede{font-family:var(--display);font-weight:200;font-size:var(--t3);line-height:1.3;
+        letter-spacing:-.02em;color:var(--bone);margin:0;max-width:24ch}
+  .under{margin:24px 0 0;color:var(--read);max-width:34ch}
+  .start{margin-top:32px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .btn{display:inline-block;padding:15px 24px;background:var(--sky);color:#08101C;
+       font:600 var(--t5)/1 var(--body);text-decoration:none;border:0;cursor:pointer;
+       transition:transform .14s ease,background .14s ease}
+  .btn:hover{background:#E6F0FF;transform:translateY(-2px)}
+  .btn:active{transform:translateY(0)}
+  .btn-q{background:var(--deep-2);color:var(--bone)}
+  .btn-q:hover{background:var(--deep-3)}
+
+  section{padding:clamp(104px,13vw,196px) 0 0}
+  h2{font-family:var(--display);font-weight:200;font-size:var(--t2);letter-spacing:-.03em;
+     line-height:1.0;margin:0 0 20px}
+  h3{font-family:var(--body);font-weight:600;font-size:var(--t4);margin:0 0 6px;
+     letter-spacing:-.01em}
+  p{margin:0 0 16px;color:var(--read)}
+  .say{color:var(--bone)}
+
+  /* the itinerary slip */
+  .slip{background:var(--bone);color:#0B1220;padding:30px 28px;margin-top:34px;
+        clip-path:polygon(0 0,100% 0,100% calc(100% - 11px),96% 100%,92% calc(100% - 11px),
+          88% 100%,84% calc(100% - 11px),80% 100%,76% calc(100% - 11px),72% 100%,
+          68% calc(100% - 11px),64% 100%,60% calc(100% - 11px),56% 100%,52% calc(100% - 11px),
+          48% 100%,44% calc(100% - 11px),40% 100%,36% calc(100% - 11px),32% 100%,
+          28% calc(100% - 11px),24% 100%,20% calc(100% - 11px),16% 100%,12% calc(100% - 11px),
+          8% 100%,4% calc(100% - 11px),0 100%)}
+  .slip h4{font:600 var(--t5)/1.3 var(--body);margin:26px 0 10px;color:#0B1220}
+  .slip h4:first-child{margin-top:0}
+  .slip .row{display:flex;align-items:baseline;gap:8px;font-size:var(--t5);
+             color:#3B475B;padding:5px 0}
+  .slip .row b{font-weight:400;color:#0B1220}
+  .slip .dots{flex:1;border-bottom:2px dotted #C3CBD8;transform:translateY(-4px)}
+  .slip .tot{display:flex;justify-content:space-between;gap:12px;background:#0B1220;
+             color:var(--bone);margin:24px -28px -30px;padding:15px 28px 26px;
+             font-size:var(--t5);font-weight:600}
+
+  /* small proof beside text */
+  .mod{display:flex;gap:22px;align-items:flex-start;margin:0 0 clamp(68px,7.5vw,104px)}
+  .mod:last-child{margin-bottom:0}
+  .shot{flex:none;width:360px;background:var(--deep-2);overflow:hidden;line-height:0}
+  .shot img{width:100%;height:auto;display:block}
+  .mod .txt{min-width:0}
+  .mod p{font-size:var(--t5);margin:0;color:var(--read)}
+
+  /* input half / output half -- released from the column, full width */
+  .wide{margin-left:calc(-1 * var(--stage) - var(--gutter));
+        width:100vw; padding:0; position:relative; z-index:2}
+  .io{display:grid;grid-template-columns:1fr 1fr;min-height:84svh}
+  .io .half{position:relative;padding:clamp(40px,5vw,86px) clamp(26px,4vw,72px) 92px;
+            display:flex;flex-direction:column;justify-content:center}
+  .io .side-in{background:var(--deep-3)}
+  .io .side-out{background:var(--bone);color:#0B1220}
+  .io .side-out p{color:#3B475B}
+  .io h2{position:absolute;bottom:28px;left:clamp(26px,4vw,72px);margin:0}
+  .chat{max-width:34ch}
+  .chat p{background:#1F3350;padding:13px 16px;margin:0 0 10px;color:var(--bone);
+          font-size:var(--t4);line-height:1.45}
+  .chat small{display:block;font-size:var(--t5);color:#A8B6CC;margin-top:6px}
+  .reply{background:#fff;padding:18px 20px;max-width:36ch;font-size:var(--t5);
+         line-height:1.55;color:#0B1220}
+  .reply b{display:block;margin-bottom:7px}
+  /* Inside data-ui: the product's own record separator. */
+  .reply .row{display:flex;gap:12px;align-items:center;padding:10px 0 0;margin-top:10px;
+              border-top:1px solid #E3E7ED} /* taste-skill-ignore */
+  .reply .tag{flex:none;width:34px;height:34px;display:grid;place-items:center;
+              background:#EDF3FC;color:#2C5B9E;font:600 11px/1 var(--body)}
+
+  /* prices like a menu */
+  .menu{columns:2;column-gap:56px;margin-top:30px}
+  .grp{break-inside:avoid;margin:0 0 30px}
+  .grp h3{font-family:var(--display);font-weight:300;font-size:var(--t3);margin-bottom:12px}
+  .it{display:flex;justify-content:space-between;gap:16px;align-items:baseline;
+      padding:7px 0;font-size:var(--t4)}
+  .it .nm{font-weight:500}
+  .it .d{display:block;font-size:var(--t5);color:var(--steel);max-width:34ch;
+         margin-top:2px;font-weight:400}
+  .it .pr{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  /* answers as reading text */
+  .qa{columns:2;column-gap:56px;margin-top:26px}
+  .qa p{break-inside:avoid;margin:0 0 20px;font-size:var(--t5);line-height:1.58;
+        color:var(--read)}
+  .qa b{color:var(--bone);font-weight:500}
+
+  /* first step, already open */
+  .close{background:var(--sky);color:#08101C;min-height:90svh;display:grid;
+         grid-template-columns:1fr 1fr;align-items:end;gap:40px;
+         padding:clamp(40px,6vw,80px) clamp(26px,4vw,72px)}
+  .close h2{color:#08101C;font-size:clamp(40px,4.6vw,70px);line-height:.96;margin:0}
+  .close .sub{color:#2C3E57;margin:16px 0 0;max-width:30ch}
+  /* The one thing on the page that genuinely floats: a dialog, open above it. */
+  .open{background:#fff;padding:26px;align-self:center;max-width:460px;width:100%;
+        box-shadow:0 18px 50px -24px rgba(8,16,28,.5)} /* taste-skill-ignore */
+  .open label{display:block;font-size:var(--t5);color:#3B475B;margin-bottom:9px}
+  /* Real form fields keep their lines. */
+  .open .field{display:flex;border:1px solid #C3CBD8;background:#fff} /* taste-skill-ignore */
+  .open .cc{padding:14px;color:#6B7893;border-right:1px solid #C3CBD8;font-size:var(--t4)} /* taste-skill-ignore */
+  .open input{flex:1;min-width:0;border:0;padding:14px;font:400 var(--t4)/1 var(--body);
+              color:#0B1220;background:transparent}
+  .open input:focus{outline:none}
+  .open .field:focus-within{border-color:#2C5B9E}
+  .open .btn{width:100%;margin-top:14px;padding:16px;background:#0B1220;color:var(--bone)}
+  .open .btn:hover{background:#17233A}
+  .open .fine{font-size:var(--t5);color:#6B7893;margin:12px 0 0}
+
+  footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:24px;
+         padding:30svh var(--gutter) 30px}
+  footer .l,footer .r{color:var(--steel)}
+  footer .c{display:flex;gap:24px;justify-content:center}
+  footer .r{text-align:right}
+  footer a{color:var(--bone);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  /* the live thing */
+  .try{margin-top:28px;background:var(--deep-2);padding:22px}
+  .try label{display:block;color:var(--steel);margin-bottom:10px;font-size:var(--t5)}
+  .try .field{display:flex;gap:10px}
+  /* A real form field. */
+  .try input{flex:1;min-width:0;background:var(--deep-3);border:1px solid var(--line);
+             color:var(--bone);padding:13px 14px;font:400 var(--t5)/1 var(--body)} /* taste-skill-ignore */
+  .try input:focus{outline:none;border-color:var(--sky)}
+  .try .out{margin:14px 0 0;font-size:var(--t5);color:var(--steel);min-height:3em}
+  .try .out b{color:var(--bone);font-weight:500}
+  .try .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .try .chip{background:var(--deep-3);color:var(--steel);border:0;
+             padding:8px 12px;font:400 var(--t5)/1 var(--body);cursor:pointer;
+             transition:color .14s,background .14s}
+  .try .chip:hover{color:#08101C;background:var(--sky)}
+
+  /* entrances */
+  .rise{opacity:0;transform:translateY(22px);
+        transition:opacity .66s cubic-bezier(.22,.61,.36,1),
+                   transform .66s cubic-bezier(.22,.61,.36,1)}
+  .rise.in{opacity:1;transform:none}
+
+  /* ---- phone: the stage becomes a band at the top, then releases -------- */
+  @media (max-width:900px){
+    :root{--stage:0px}
+    .stage{position:sticky;width:100%;height:56svh;padding:60px 16px 0;z-index:1}
+    .flow{margin-left:0;padding:0 16px;position:relative;z-index:2;
+          background:var(--deep)}
+    .col{padding:0;max-width:none}
+    nav{position:fixed;top:0;left:0;right:0;justify-content:flex-end;gap:16px;
+        padding:12px 16px;background:var(--deep);z-index:4}
+    nav a.hide-s{display:none}
+    /* On a phone the name leads, so the button under it is not a kicker. One
+       h1, moved by order -- a second copy would leave the first with no size. */
+    h1{order:-1;margin:16px 0 18px;font-size:22vw;letter-spacing:-.05em}
+    .hero-read{margin:0}
+    .hero{min-height:auto;padding:0 0 36px}
+    .mod{flex-direction:column;gap:14px}
+    .shot{width:100%}
+    .io{grid-template-columns:1fr}
+    .io .half{min-height:62svh}
+    /* Wide enough to close the right edge, capped so the line stays readable. */
+    .chat,.reply{max-width:none}
+    .lede{max-width:20ch}
+    .under,.close .sub{max-width:56ch}
+    .slip,.mod{max-width:none}
+    .col section > p{max-width:62ch}
+    .menu,.qa{columns:1}
+    .close{grid-template-columns:1fr;align-items:start}
+    .close h2{font-size:13vw}
+    footer{grid-template-columns:1fr;padding:18svh 16px 28px}
+    footer .c{justify-content:flex-start;flex-wrap:wrap}
+    footer .r{text-align:left}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .rise{opacity:1;transform:none;transition:none}
+    .btn{transition:none}
+  }
 </style>
-{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="hide-s" href="#how">How it works</a>
+  <a class="hide-s" href="#shelves">Shelves</a>
+  <a class="hide-s" href="#price">Price</a>
+  <a class="hide-s" href="#questions">Questions</a>
+  {% if visitor %}<a class="act" href="/buy">Buy now</a>
+  {% else %}<a class="act" href="/auth/google">Start</a>{% endif %}
+</nav>
+
+<div class="stage" aria-hidden="true">
+  <div class="stage-inner">
+    <canvas id="scene"></canvas>
+    <span class="stage-note">your shelf, assembling</span>
+    <div class="legend" id="legend">
+      <span><i class="m"></i>Material</span>
+      <span><i class="p"></i>PYQ</span>
+      <span><i class="f"></i>Info</span>
+    </div>
+  </div>
+</div>
+
+<main class="flow">
+  <div class="col">
+
+    <header class="hero">
+      <div class="hero-read">
+      <p class="lede rise">Forward it once. Ask for it whenever.</p>
+      <p class="under rise">One WhatsApp contact that files the notes, slides and
+        deadlines you forward, and gives them back when you ask in plain words.
+        No app to install, no folders to make.</p>
+      <div class="start rise">
+        {% if visitor %}<a class="btn" href="/buy">Buy now, ₹{{ rupees }} a month</a>
+        {% else %}<a class="btn" href="/auth/google">Start, ₹{{ rupees }} a month</a>{% endif %}
+        <a class="btn btn-q" href="#how">See how it works</a>
+      </div>
+      {% if error %}<p class="under" role="alert" style="color:#E4B46A">{{ error }}</p>{% endif %}
+      </div>
+      <h1>shelf</h1>
+    </header>
+
+    <section id="how">
+      <h2 class="rise">Forward. Filed. Found.</h2>
+      <p class="rise say">Nothing to set up on the day you need it. The filing already
+        happened, in the chat you were already in.</p>
+
+      <div class="slip rise">
+        <h4>The moment you send it</h4>
+        <div class="row"><b>Forward from the class group</b><span class="dots"></span><span>one tap</span></div>
+        <div class="row"><b>It reads your caption, not the filename</b><span class="dots"></span><span>2 sec</span></div>
+        <h4>Before you put the phone down</h4>
+        <div class="row"><b>Filed under its subject and shelf</b><span class="dots"></span><span>one reply</span></div>
+        <div class="row"><b>Told exactly where it went</b><span class="dots"></span><span>1 message</span></div>
+        <h4>Any week after that</h4>
+        <div class="row"><b>Ask the way you'd ask a friend</b><span class="dots"></span><span>“dbms unit 3”</span></div>
+        <div class="row"><b>It comes back</b><span class="dots"></span><span>the file itself</span></div>
+        <div class="tot"><span>Everything you forwarded, on one shelf</span><span>₹{{ rupees }}/month</span></div>
+      </div>
+
+      <div class="try rise">
+        <label for="fn">Hand it a filename the way WhatsApp gives you one</label>
+        <div class="field">
+          <input id="fn" type="text" value="CamScanner 03-01-2026 10.14.pdf"
+                 autocomplete="off" spellcheck="false" aria-describedby="filed">
+          <button class="btn" type="button" id="go">File it</button>
+        </div>
+        <div class="chips">
+          <button class="chip" type="button">dbms unit3 notes</button>
+          <button class="chip" type="button">DCN previous year papers</button>
+          <button class="chip" type="button">3rd yr syllabus</button>
+          <button class="chip" type="button">IMG-20261031-WA0042.jpg</button>
+        </div>
+        <p class="out" id="filed" aria-live="polite">A scanner's filename says nothing, so
+          this one waits for you to say what it is. Try one of the others.</p>
+      </div>
+    </section>
+
+    <section id="shelves">
+      <h2 class="rise">Three shelves, every subject</h2>
+      <p class="rise say">The same three in every subject, always all three, even when one
+        is empty. A tree whose shape depends on what is already in it cannot be learned.</p>
+
+      <div class="mod rise">
+        <div class="shot"><img src="/static/shots/home.png" width="900" height="470"
+             alt="The files home: Semester 5 with ten files, and the most recently saved ones listed."
+             loading="lazy"></div>
+        <div class="txt">
+          <h3>Your terms, then your subjects</h3>
+          <p>A folder here is a question the database answers, not a row somebody made.
+            Nothing to create, rename, move or repair.</p>
+        </div>
+      </div>
+
+      <div class="mod rise">
+        <div class="shot"><img src="/static/shots/shelves.png" width="900" height="360"
+             alt="A subject page showing the Material, PYQ and Info shelves side by side."
+             loading="lazy"></div>
+        <div class="txt">
+          <h3>Material, PYQ, Info &amp; Admin</h3>
+          <p>Say “previous year papers” and it lands on PYQ. Free-form types grow a folder
+            per phrasing, and forty folders in one subject is worse than no drive at all.</p>
+        </div>
+      </div>
+
+      <div class="mod rise">
+        <div class="shot"><img src="/static/shots/deadlines.png" width="900" height="400"
+             alt="The deadlines page listing three upcoming submissions with their dates."
+             loading="lazy"></div>
+        <div class="txt">
+          <h3>Deadlines it noticed</h3>
+          <p>Somebody announces a submission in the group and you forward it. The date is
+            kept, and you are nudged the day before, not the morning of.</p>
+        </div>
+      </div>
+
+      <div class="mod rise">
+        <div class="shot"><img src="/static/shots/search.png" width="900" height="420"
+             alt="Search results for the word dcn, matching files across subjects."
+             loading="lazy"></div>
+        <div class="txt">
+          <h3>Search the words you used</h3>
+          <p>Not the scanner's words. A file called “CamScanner 03-01-2026 10.14.pdf” is
+            kept under whatever you called it when you sent it.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="wide" id="reply">
+    <div class="io">
+      <div class="half side-in">
+        <div class="chat rise">
+          <p>dbms unit3 notes<small>with a 4 MB PDF attached</small></p>
+          <p>also this is the one sir said is important<small>two seconds later</small></p>
+        </div>
+        <h2 style="color:var(--bone)">You type</h2>
+      </div>
+      <div class="half side-out">
+        <div class="reply rise" data-ui>
+          <b>Added to your shelf</b>
+          Saved <strong>DBMS_U3.pdf</strong> as “DBMS Unit 3 Notes” under Database Systems.
+          <span class="row"><span class="tag">PDF</span><span>DBMS Unit 3 Notes · Material</span></span>
+        </div>
+        <p class="rise" style="margin-top:18px;max-width:34ch">Two messages two seconds
+          apart are one turn, so you get one reply and not two. Both are about the same
+          file, and it knows that.</p>
+        <h2 style="color:#0B1220">it files</h2>
+      </div>
+    </div>
+  </section>
+
+  <div class="col">
+    <section id="price">
+      <h2 class="rise">What ₹{{ rupees }} buys</h2>
+      <p class="rise say">One price, every term, everything included. No storage tiers and
+        nothing that costs extra the week before an exam.</p>
+
+      <div class="menu rise">
+        <div class="grp">
+          <h3>Filing</h3>
+          <div class="it"><span class="nm">Files you forward<span class="d">PDFs, slides, scans, photos, pasted notices</span></span><span class="pr">unlimited</span></div>
+          <div class="it"><span class="nm">Subjects a term<span class="d">added and renamed by asking</span></span><span class="pr">12</span></div>
+        </div>
+        <div class="grp">
+          <h3>Asking</h3>
+          <div class="it"><span class="nm">Questions in chat<span class="d">plain words, English or Hinglish</span></span><span class="pr">unlimited</span></div>
+          <div class="it"><span class="nm">The website<span class="d">browse instead of asking, on two devices</span></span><span class="pr">included</span></div>
+        </div>
+        <div class="grp">
+          <h3>Remembering</h3>
+          <div class="it"><span class="nm">Deadlines kept<span class="d">spotted in what you forward</span></span><span class="pr">unlimited</span></div>
+          <div class="it"><span class="nm">Reminders a month<span class="d">capped, so a stray “daily” can't drain it</span></span><span class="pr">60</span></div>
+        </div>
+        <div class="grp">
+          <h3>Leaving</h3>
+          <div class="it"><span class="nm">A copy of everything<span class="d">asked for in chat, sent back as files</span></span><span class="pr">free</span></div>
+          <div class="it"><span class="nm">Cancelling<span class="d">you keep the term you paid for</span></span><span class="pr">free</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="questions">
+      <h2 class="rise">Questions</h2>
+      <div class="qa rise">
+        <p><b>Do I have to install anything?</b> No. It is one more contact in the WhatsApp
+          you already have open. The website is for browsing and is optional.</p>
+        <p><b>How does it know which subject?</b> From what you say when you send it. If
+          your words fit two subjects, it asks instead of guessing.</p>
+        <p><b>What if I send forty files at once?</b> That is one reply, not forty. Messages
+          arriving together are treated as a single turn.</p>
+        <p><b>Can it read a scan?</b> It reads the caption you send with it, and it reads
+          photographs: a timetable screenshot becomes your subject list.</p>
+        <p><b>What about .zip files?</b> WhatsApp never delivers those to us, so nothing can
+          store them. Send the files inside, and it will tell you so if you try.</p>
+        <p><b>Who sees my notes?</b> Nobody here reads them. Logs carry identifiers only:
+          never message text, never your number.</p>
+        <p><b>Is my number safe?</b> You prove it by sending <i>us</i> a code from your own
+          phone. Nothing is ever sent to you, so there is nothing to be talked out of.</p>
+        <p><b>What if I stop paying?</b> You keep what you paid for until that period ends.
+          After that access closes, and the data is deleted on the schedule the privacy
+          policy states.</p>
+        <p><b>Can I get everything back out?</b> Ask, and it sends a copy of all of it.
+          Leaving should cost nothing.</p>
+        <p><b>Does it work on a cheap phone?</b> Yes. The chat is WhatsApp, and the website
+          is text and pictures with nothing to install.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="wide">
+    <div class="close">
+      <div>
+        <h2>Start your shelf</h2>
+        <p class="sub">Sign in, prove the number you use WhatsApp on, then forward the
+          first thing. Nothing is charged until that number is proved.</p>
+      </div>
+      <form class="open" action="/auth/google" method="get" data-ui>
+        <label for="num">The number WhatsApp is on</label>
+        <div class="field">
+          <span class="cc">+91</span>
+          <input id="num" name="hint" type="tel" inputmode="numeric"
+                 placeholder="98765 43210" autocomplete="tel-national" maxlength="11">
+        </div>
+        <button class="btn" type="submit">Continue with Google</button>
+        <p class="fine">We ask Google who you are, then ask your phone to prove itself.
+          Both happen before any payment.</p>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <span class="l">One contact that files what you forward</span>
+    <span class="c">
+      <a href="/terms">Terms</a><a href="/privacy">Privacy</a>
+      <a href="/refunds">Refunds</a><a href="/cancel">Cancel</a>
+      <a href="/contact">Contact</a>
+    </span>
+    <span class="r">© 2026 · <a href="/privacy">Privacy</a></span>
+  </footer>
+</main>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * The stage: an isometric 3D renderer. No library.
+ *
+ * The brand mark is isometric, so perspective would be less faithful as
+ * well as heavier. The whole projection is:
+ *     sx = (x - z) * cos30 ;  sy = (x + z) * sin30 - y
+ * Boxes draw back to front (painter's algorithm) with three flat tones
+ * each -- lit top, two stepped sides. No gradients anywhere.
+ * ------------------------------------------------------------------ */
+(function () {
+  var cv = document.getElementById('scene');
+  if (!cv || !cv.getContext) return;
+  var ctx = cv.getContext('2d');
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var COS30 = Math.cos(Math.PI / 6), SIN30 = 0.5;
+  var TINT = ['#CFE4FF', '#E4B46A', '#7FD4B0'];
+
+  function shade(hex, f) {                     // a flat tone step, never a gradient
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgb(' + Math.round(((n >> 16) & 255) * f) + ',' +
+                    Math.round(((n >> 8) & 255) * f) + ',' +
+                    Math.round((n & 255) * f) + ')';
+  }
+
+  var W = 0, H = 0, S = 1, ox = 0, oy = 0;
+  function size() {
+    var r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+    W = r.width; H = r.height;
+    if (!W || !H) return;
+    cv.width = Math.round(W * d); cv.height = Math.round(H * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    S = Math.min(W, H) / 430;
+    ox = W / 2; oy = H / 2 + 64 * S;
+  }
+  function pt(x, y, z) {
+    return [ox + (x - z) * COS30 * S, oy + ((x + z) * SIN30 - y) * S];
+  }
+
+  function box(x, y, z, w, h, d, col, yaw, alpha) {
+    var c = Math.cos(yaw || 0), s = Math.sin(yaw || 0), q = [];
+    for (var i = 0; i < 4; i++) {
+      var sx = (i === 0 || i === 3) ? -w : w, sz = (i < 2) ? -d : d;
+      q.push([x + sx * c - sz * s, z + sx * s + sz * c]);
+    }
+    ctx.globalAlpha = alpha === undefined ? 1 : Math.max(0, Math.min(1, alpha));
+    function face(p, fill) {
+      ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]);
+      for (var i = 1; i < p.length; i++) ctx.lineTo(p[i][0], p[i][1]);
+      ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+    }
+    face([pt(q[3][0], y + h, q[3][1]), pt(q[2][0], y + h, q[2][1]),
+          pt(q[2][0], y - h, q[2][1]), pt(q[3][0], y - h, q[3][1])], shade(col, .50));
+    face([pt(q[2][0], y + h, q[2][1]), pt(q[1][0], y + h, q[1][1]),
+          pt(q[1][0], y - h, q[1][1]), pt(q[2][0], y - h, q[2][1])], shade(col, .32));
+    face([pt(q[0][0], y + h, q[0][1]), pt(q[1][0], y + h, q[1][1]),
+          pt(q[2][0], y + h, q[2][1]), pt(q[3][0], y + h, q[3][1])], col);
+    ctx.globalAlpha = 1;
+  }
+
+  var SHELVES = [{ y: 80, t: 0 }, { y: 14, t: 1 }, { y: -52, t: 2 }];
+  var N = 30, plates = [];
+  for (var i = 0; i < N; i++) {
+    var sh = i % 3, slot = Math.floor(i / 3);
+    plates.push({
+      shelf: sh, cx: (Math.random() - .5) * 500, cy: 140 + Math.random() * 460,
+      cz: (Math.random() - .5) * 500, cyaw: Math.random() * 6.283,
+      t0: .08 + (i / N) * .38, dur: .26,
+      rx: -74 + slot * 15, rz: -34 + (slot % 3) * 7, drift: Math.random() * 6.283
+    });
+  }
+
+  function ease(t) { return t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  var live = [], P = 0, tms = 0;
+
+  function render() {
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+    var p = P, fold = ease((p - .74) / .26), items = [];
+
+    SHELVES.forEach(function (sh, i) {
+      if (fold > 0 && i !== 1) {
+        var tx = i === 0 ? -30 : 30, ty = i === 0 ? -46 : 46;
+        items.push({ x: lerp(0, tx, fold), y: lerp(sh.y, ty, fold), z: lerp(0, -tx, fold),
+                     w: lerp(104, 86, fold), h: lerp(7, 15, fold), d: lerp(60, 50, fold),
+                     col: i === 0 ? '#6E82A4' : '#E4EDFB', yaw: 0, a: 1 });
+        return;
+      }
+      items.push({ x: 0, y: sh.y, z: 0, w: 104, h: 7, d: 60,
+                   col: shade(TINT[sh.t], .60), yaw: 0,
+                   a: (i === 1 ? 1 - fold : 1) * (p > .05 ? 1 : p / .05) });
+    });
+
+    plates.forEach(function (pl) {
+      var t = ease((p - pl.t0) / pl.dur);
+      var fl = Math.sin(tms / 900 + pl.drift) * (1 - t) * 11;
+      items.push({
+        x: lerp(pl.cx, pl.rx, t), y: lerp(pl.cy + fl, SHELVES[pl.shelf].y + 10, t),
+        z: lerp(pl.cz, pl.rz, t), w: 15, h: 2.2, d: 11,
+        col: TINT[pl.shelf], yaw: lerp(pl.cyaw, 0, t), a: 1 - fold
+      });
+    });
+
+    live.forEach(function (lv) {
+      var t = ease((tms - lv.born) / 1200);
+      items.push({ x: lerp(lv.cx, lv.rx, t), y: lerp(300, SHELVES[lv.shelf].y + 10, t),
+                   z: lerp(lv.cz, lv.rz, t), w: 17, h: 2.4, d: 12,
+                   col: TINT[lv.shelf], yaw: lerp(lv.cyaw, 0, t), a: 1 - fold });
+    });
+
+    items.sort(function (a, b) { return (a.x + a.z - a.y) - (b.x + b.z - b.y); });
+    items.forEach(function (o) { box(o.x, o.y, o.z, o.w, o.h, o.d, o.col, o.yaw, o.a); });
+  }
+
+  function onScroll() {
+    var h = Math.max(1, document.body.scrollHeight - innerHeight);
+    P = still ? 1 : Math.min(1, Math.max(0, scrollY / (h * .60)));
+    var lg = document.getElementById('legend');
+    if (lg) lg.classList.toggle('on', P > .26 && P < .78);
+  }
+  function frame(now) { tms = now || 0; render(); requestAnimationFrame(frame); }
+
+  size(); onScroll(); render();
+  addEventListener('resize', function () { size(); render(); }, { passive: true });
+  addEventListener('scroll', onScroll, { passive: true });
+  requestAnimationFrame(frame);
+
+  /* ---- the live thing: hand it a filename, watch it land ----------- */
+  var PYQ = /\b(pyq|previous year|question bank|qb|papers?|cie|see|model answers?)\b/i;
+  var INFO = /\b(syllabus|time ?table|circular|notice|announcement|calendar|scheme)\b/i;
+  var SHORT = { yr: 'Year', u: 'Unit', dbms: 'DBMS', dcn: 'DCN', aiml: 'AIML', pyq: 'PYQ',
+                sem: 'Semester', fafl: 'FAFL', bda: 'BDA', ppt: 'Slides', qb: 'Question Bank',
+                cie: 'CIE', see: 'SEE', os: 'OS', se: 'SE' };
+  var SCANNER = /^(camscanner|img[-_ ]?\d|whatsapp (image|document)|doc|scan|image|photo)/i;
+
+  function esc(s) {
+    return String(s).replace(/[<>&]/g, function (c) {
+      return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]; });
+  }
+  function tidy(raw) {
+    return raw.replace(/\.[a-z0-9]{2,4}$/i, '').replace(/_+/g, ' ')
+      /* "unit3" is one word to a scanner and two to a student. */
+      .replace(/([a-z])(\d)/gi, '$1 $2')
+      .replace(/\s+/g, ' ').trim().split(' ').map(function (w) {
+        var k = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (SHORT[k]) return SHORT[k];
+        if (/^\d+$/.test(w)) return w;
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }).join(' ');
+  }
+  function fileIt(raw) {
+    var out = document.getElementById('filed');
+    raw = (raw || '').trim();
+    if (!raw) return;
+    if (SCANNER.test(raw)) {
+      out.innerHTML = '<b>' + esc(raw) + '</b> . A scanner’s filename says nothing, ' +
+        'so this one waits for you to say what it is. That ask is the whole feature.';
+      return;
+    }
+    var shelf = PYQ.test(raw) ? 1 : INFO.test(raw) ? 2 : 0;
+    out.innerHTML = 'Saved as <b>' + esc(tidy(raw)) + '</b>, filed on <b>' +
+      ['Material', 'PYQ &amp; Questions', 'Info &amp; Admin'][shelf] + '</b>.';
+    live.push({ shelf: shelf, cx: (Math.random() - .5) * 320, cz: 280,
+                cyaw: Math.random() * 6.283, rx: 54, rz: -30 + Math.random() * 10,
+                born: tms });
+    if (live.length > 6) live.shift();
+  }
+
+  var inp = document.getElementById('fn');
+  document.getElementById('go').addEventListener('click', function () { fileIt(inp.value); });
+  inp.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); fileIt(inp.value); }
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.try .chip'), function (c) {
+    c.addEventListener('click', function () { inp.value = c.textContent; fileIt(c.textContent); });
+  });
+
+  /* ---- entrances --------------------------------------------------- */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e, i) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        setTimeout(function () { el.classList.add('in'); }, (i % 5) * 75);
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    Array.prototype.forEach.call(document.querySelectorAll('.rise'), function (el) {
+      io.observe(el);
+    });
+  } else {
+    Array.prototype.forEach.call(document.querySelectorAll('.rise'), function (el) {
+      el.classList.add('in');
+    });
+  }
+})();
+</script>
+</body>
+</html>
